@@ -209,12 +209,19 @@ st.markdown(f"""
         box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
 
-    /* 5. 결과창 대형 복사 버튼 강조 스타일 */
+    /* 5. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 스타일 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
         border: 1px solid #3d424b !important;
         background: #1e2025 !important;
+    }}
+    .stCodeBlock code {{
+        white-space: pre-wrap !important;
+        word-break: break-word !important;
+        line-height: 1.65 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 15px !important;
     }}
     .stCodeBlock button[title="Copy to clipboard"], 
     .stCodeBlock button[aria-label="Copy to clipboard"],
@@ -679,9 +686,16 @@ if generate_action:
 사용자가 제공한 [가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
 
 [핵심 절대 원칙 (CRITICAL)]
-1. [종결 어미 스타일 엄수]:
+1. [가독성 극대화 줄바꿈 원칙 (STRICT)]:
+- 한 줄로 길게 이어지는 만연체 문장은 절대 금지합니다.
+- 모바일 및 PC 화면에서 한눈에 잘 읽히도록, 문장이 끝날 때마다 혹은 의미 단위로 1~2문장(공백 포함 30~50자 내외)마다 엔터(줄바꿈)를 쳐서 산뜻하게 단락을 구성하세요.
+- 각 생각의 덩어리 사이에는 빈 줄을 1줄씩 넣어 호흡을 편안하게 만드세요.
+
+2. [종결 어미 스타일 엄수]:
 - '~했다', '~해봤다' 등 딱딱한 어미 대신 친근하고 부드러운 30대 여성 찐후기 어조(~해보고, ~발라봤는데, ~직접 써보니까 등)를 유지하세요.
-2. [브랜드명 및 고유명칭 원형 유지]: 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
+
+3. [브랜드명 및 고유명칭 원형 유지]:
+- 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
 
 [출력 양식 템플릿 - 아래 형식을 엄격히 지켜 출력할 것]
 
@@ -698,28 +712,36 @@ if generate_action:
 (촬영 가이드: 제품 본품 연출 컷 또는 고민 부위 클로즈업 컷)
 
 [원고 텍스트]
-(도입부: 최근 겪고 있는 피부 고민과 제품을 사용해보게 된 계기를 솔직하고 친근하게 이야기하는 텍스트)
+(도입부: 최근 피부 고민을 솔직하고 친근하게 이야기)
+(1~2문장마다 줄바꿈을 적용하여)
+(가로로 길게 늘어지지 않게 작성)
+
+(생각의 흐름이 바뀔 때는 한 줄 띄우고)
+(이어서 자연스럽게 작성)
 
 
 [사진 2]
 (촬영 가이드: 제품 패키지 외관 및 토출구/어플리케이터 클로즈업 컷)
 
 [원고 텍스트]
-(브랜드 및 제품의 핵심 성분과 USP, 특징을 소개하는 텍스트)
+(브랜드 및 제품의 핵심 성분과 USP, 특징 소개)
+(적당한 길이로 줄바꿈 유지)
 
 
 [사진 3]
 (촬영 가이드: 손등이나 피부에 제형을 덜어내어 텍스처와 발림성을 보여주는 컷)
 
 [원고 텍스트]
-(제형의 촉촉함, 흡수력, 끈적임 여부 등을 생생하게 묘사하는 텍스트)
+(제형의 촉촉함, 흡수력, 끈적임 여부 디테일 묘사)
+(읽기 편하게 1~2문장 단위 줄바꿈)
 
 
 [사진 4]
 (촬영 가이드: 실제 얼굴/고민 부위에 제품을 도포하고 롤링/마사지하며 바르는 실사용 컷)
 
 [원고 텍스트]
-(직접 사용하면서 느낀 사용 편의성과 부위별 관리 꿀팁을 전하는 텍스트)
+(직접 사용하며 느낀 꿀팁과 부위별 관리법 전달)
+(문장마다 적절히 엔터 적용)
 
 
 [사진 5]
@@ -727,6 +749,7 @@ if generate_action:
 
 [원고 텍스트]
 (실제 사용 후 피부 변화 체감과 솔직한 찐후기 총평)
+(모바일 가독성 맞춤 줄바꿈)
 
 
 [사진 6]
@@ -734,6 +757,7 @@ if generate_action:
 
 [원고 텍스트]
 (프로모션 일정, 할인 혜택, 특가 가격, 구매처 안내 및 마무리 추천 멘트)
+(끝까지 깔끔한 줄바꿈 유지)
 
 -------------------------------------------------------
 
@@ -741,7 +765,7 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙과 부드러운 구어체 어미(~했다 금지)를 100% 지켜 네이버 블로그 원고를 작성해줘:
+다음 정보를 바탕으로 위 블로그 템플릿 규칙과 [가독성 줄바꿈 원칙], 부드러운 구어체 어미(~했다 금지)를 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -776,7 +800,7 @@ label_type = "인스타그램 대본" if is_insta else "블로그 원고"
 st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
 
 if current_result:
-    # Streamlit 내장 코드 블록 (우측 상단 대형 복사 버튼)
+    # Streamlit 내장 코드 블록 (우측 상단 대형 복사 버튼 + 자동 줄바꿈)
     st.code(current_result, language="markdown")
 else:
     st.markdown(
