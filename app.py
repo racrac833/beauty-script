@@ -195,7 +195,17 @@ st.markdown(f"""
         font-weight: 900 !important;
     }}
 
-    /* 4. 사이드바 동적 넘버링 뱃지 */
+    /* 4. 사이드바 내부 RAMILOVE 로고 스타일 */
+    .sidebar-logo {{
+        font-size: 26px !important;
+        font-weight: 900 !important;
+        color: #FFFFFF !important;
+        letter-spacing: 1.5px !important;
+        margin-bottom: 15px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }}
+
+    /* 5. 사이드바 동적 넘버링 뱃지 */
     .sidebar-section-title {{
         display: flex;
         align-items: center;
@@ -219,7 +229,7 @@ st.markdown(f"""
         box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
 
-    /* 5. 사이드바 소제목 앞 미니 포인트 원 (Bullet Dot) */
+    /* 6. 사이드바 소제목 앞 미니 포인트 원 (Bullet Dot) */
     section[data-testid="stSidebar"] label p {{
         display: flex !important;
         align-items: center !important;
@@ -239,7 +249,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 바 및 핸들 테마 동기화 (마커 및 호버 숫자 완전 제거) */
+    /* 7. 슬라이더 바 테마 동기화 */
     div[data-testid="stSlider"] {{
         margin-bottom: 14px !important;
     }}
@@ -268,7 +278,7 @@ st.markdown(f"""
         display: none !important;
     }}
 
-    /* 7. 결과창 헤더 뱃지 */
+    /* 8. 결과창 헤더 뱃지 */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -305,7 +315,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 8. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 9. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -437,6 +447,9 @@ def fetch_url_content(url):
 
 # ==================== [4. 사이드바 구성] ====================
 with st.sidebar:
+    # 사이드바 상단 RAMILOVE 로고 삽입
+    st.markdown('<div class="sidebar-logo">RAMILOVE</div>', unsafe_allow_html=True)
+    
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
     uploaded_images = st.file_uploader(
         "가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
@@ -534,7 +547,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 깔끔한 기본 슬라이더 (인스타 6~12, 블로그 15~20)
+    # 깔끔한 슬라이더 적용
     if is_insta:
         st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
@@ -704,6 +717,7 @@ if generate_action:
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
 - 필수 해시태그: {essential_tags if essential_tags else '없음'}
+- 공식 계정 태그: {account_tags if account_tags else '없음'}
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
