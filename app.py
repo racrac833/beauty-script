@@ -235,7 +235,23 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
+    /* 6. 슬라이더 줄자형 눈금 마커(Tick Marks) 및 트랙 스타일 */
+    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
+        margin-top: 4px !important;
+        margin-bottom: 6px !important;
+    }}
+    div[data-testid="stSlider"] div[data-baseweb="slider"] > div:first-child {{
+        background: {'repeating-linear-gradient(to right, #4a4f59, #4a4f59 calc(100% / 6 - 2px), #757b88 calc(100% / 6 - 2px), #757b88 calc(100% / 6))' if is_insta else 'repeating-linear-gradient(to right, #4a4f59, #4a4f59 calc(100% / 12 - 2px), #757b88 calc(100% / 12 - 2px), #757b88 calc(100% / 12))'} !important;
+        height: 6px !important;
+        border-radius: 4px !important;
+    }}
+    div[data-testid="stSlider"] div[role="slider"] {{
+        background: {naver_green if not is_insta else '#ff4b72'} !important;
+        border: 2px solid #ffffff !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+    }}
+
+    /* 7. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -272,7 +288,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 7. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
+    /* 8. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -479,11 +495,11 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
-    # 공통: 제품 카테고리 (key 직접 연결로 튕김 현상 제거)
+    # 공통: 제품 카테고리
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 모드별 분량 슬라이더 (key 직접 연결로 단 한 번에 부드럽게 이동)
+    # 모드별 분량 슬라이더 (줄자 눈금 적용 및 1회 터치 즉시 이동)
     if is_insta:
         st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
