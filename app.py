@@ -79,11 +79,13 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: Streamlit 자체 컨테이너 내 완벽 중앙 정렬 */
+    /* 3. 하단 중앙 생성 버튼: Streamlit 컨테이너 전역 중앙 정렬 */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
     }}
 
     .st-key-btn_generate_main button {{
@@ -292,7 +294,7 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [상단 채널 선택 탭 2개: [0.2, 0.3, 0.3, 0.2] 구조] ====================
+# ==================== [상단 채널 선택 탭 2개: 좌우 60% 슬림 중앙 정렬] ====================
 pad_left, tab_col1, tab_col2, pad_right = st.columns([0.2, 0.3, 0.3, 0.2])
 
 with tab_col1:
@@ -307,11 +309,8 @@ with tab_col2:
 
 st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
-# ==================== [하단 생성 버튼: 상단 탭과 동일한 중심축 [0.2, 0.6, 0.2] 구조로 완벽 정렬] ====================
-_, center_col, _ = st.columns([0.2, 0.6, 0.2])
-
-with center_col:
-    generate_action = st.button("EXECUTE", key="btn_generate_main")
+# ==================== [하단 생성 버튼: 컬럼 분할 없이 전역 완벽 중앙 정렬] ====================
+generate_action = st.button("EXECUTE", key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
@@ -647,3 +646,4 @@ if generate_action:
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
+                    
