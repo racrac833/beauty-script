@@ -11,8 +11,53 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-st.set_page_config(page_title="뷰티 콘텐츠 생성기 (릴스 & 블로그)", layout="wide")
-st.title("✨ 뷰티 숏폼 릴스 & 네이버 블로그 원고 생성기")
+st.set_page_config(page_title="뷰티 콘텐츠 생성기 (인스타 & 블로그)", layout="wide")
+
+# 커스텀 CSS (인스타그램 그라디언트 & 네이버 블로그 그린 스타일)
+st.markdown("""
+<style>
+    /* 제목 스타일 */
+    .main-title {
+        font-size: 26px !important;
+        font-weight: 800;
+        margin-bottom: 25px;
+    }
+    
+    /* 인스타그램 버튼 스타일 */
+    div.stButton > button[key="btn_insta_generate"] {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+        color: white !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        padding: 14px 20px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3) !important;
+    }
+    div.stButton > button[key="btn_insta_generate"]:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+    }
+
+    /* 네이버 블로그 버튼 스타일 */
+    div.stButton > button[key="btn_blog_generate"] {
+        background-color: #03C75A !important;
+        color: white !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        padding: 14px 20px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.3) !important;
+    }
+    div.stButton > button[key="btn_blog_generate"]:hover {
+        background-color: #02b351 !important;
+        transform: translateY(-1px);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">✨ 뷰티 인스타그램 대본 & 블로그 원고 생성기</div>', unsafe_allow_html=True)
 
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
@@ -35,6 +80,8 @@ if "account_tags" not in st.session_state:
     st.session_state.account_tags = ""
 if "event_info" not in st.session_state:
     st.session_state.event_info = ""
+if "content_mode" not in st.session_state:
+    st.session_state.content_mode = "instagram"
 
 class ExtractedGuide(BaseModel):
     brand_name: str = Field(description="가이드/상세페이지/이미지에서 확인된 원문 그대로의 정확한 브랜드명 (단 1글자도 변경/번역 금지)")
@@ -148,10 +195,6 @@ with st.sidebar:
     essential_tags = st.text_input("필수 해시태그", value=st.session_state.essential_tags)
     account_tags = st.text_input("공식 계정 태그", value=st.session_state.account_tags)
 
-# 탭 구성 (릴스 대본 / 네이버 블로그 원고)
-tab1, tab2 = st.tabs(["🎬 숏폼 릴스 대본 생성", "📝 네이버 블로그 원고 생성"])
-
-# 공통 URL 컨텍스트 준비 함수
 def get_url_context():
     url_context = ""
     if guideline_url.strip():
@@ -164,14 +207,56 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [TAB 1: 숏폼 릴스 대본] ====================
-with tab1:
-    st.subheader("🎬 숏폼(릴스/쇼츠) 전문 촬영 콘티")
-    if st.button("🎬 릴스 대본 생성하기", type="primary", use_container_width=True, key="btn_reels"):
+# ==================== [메인 영역: 채널 선택 카드] ====================
+st.markdown("### 📌 작성할 콘텐츠 유형을 선택하세요")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    is_insta = (st.session_state.content_mode == "instagram")
+    insta_card_border = "3px solid #dc2743" if is_insta else "1px solid #e0e0e0"
+    insta_bg = "linear-gradient(135deg, rgba(240, 148, 51, 0.08) 0%, rgba(220, 39, 67, 0.08) 100%)" if is_insta else "#ffffff"
+    
+    st.markdown(f"""
+    <div style="border: {insta_card_border}; background: {insta_bg}; padding: 18px 20px; border-radius: 14px; text-align: center; margin-bottom: 10px;">
+        <span style="font-size: 32px;">📸</span>
+        <div style="font-size: 20px; font-weight: 800; color: #dc2743; margin-top: 5px;">인스타그램 대본</div>
+        <div style="font-size: 13px; color: #666; margin-top: 4px;">숏폼 릴스 전용 / 30대 여성 찐후기 콘티</div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("📸 인스타그램 대본 선택", use_container_width=True, key="select_insta"):
+        st.session_state.content_mode = "instagram"
+        st.rerun()
+
+with col2:
+    is_blog = (st.session_state.content_mode == "blog")
+    blog_card_border = "3px solid #03C75A" if is_blog else "1px solid #e0e0e0"
+    blog_bg = "rgba(3, 199, 90, 0.08)" if is_blog else "#ffffff"
+    
+    st.markdown(f"""
+    <div style="border: {blog_card_border}; background: {blog_bg}; padding: 18px 20px; border-radius: 14px; text-align: center; margin-bottom: 10px;">
+        <span style="font-size: 32px;">📝</span>
+        <div style="font-size: 20px; font-weight: 800; color: #03C75A; margin-top: 5px;">블로그 원고</div>
+        <div style="font-size: 13px; color: #666; margin-top: 4px;">네이버 SEO 최적화 / 사진 촬영 가이드 포함</div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("📝 블로그 원고 선택", use_container_width=True, key="select_blog"):
+        st.session_state.content_mode = "blog"
+        st.rerun()
+
+st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+
+# ==================== [선택된 모드에 따른 화면 및 생성 버튼] ====================
+
+if st.session_state.content_mode == "instagram":
+    st.markdown("#### 🎬 인스타그램 릴스 대본 작성 모드")
+    generate_insta = st.button("📸 인스타그램 대본 생성하기", use_container_width=True, key="btn_insta_generate")
+    
+    if generate_insta:
         if not brand_name or not product_usp:
-            st.warning("사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
+            st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
         else:
-            with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 릴스 대본을 작성 중입니다..."):
+            with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 인스타그램 대본을 작성 중입니다..."):
                 url_context = get_url_context()
 
                 system_instruction_reels = f"""
@@ -275,7 +360,7 @@ with tab1:
 (1~4번 씬의 전체 나레이션 전문을 모아서 줄바꿈하여 출력 / 공백 포함 280~300자)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 뷰티 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -300,19 +385,20 @@ with tab1:
                             temperature=0.4,
                         )
                     )
-                    st.success("🎬 릴스 대본이 성공적으로 완성되었습니다!")
+                    st.success("📸 인스타그램 대본이 성공적으로 완성되었습니다!")
                     st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
                     st.markdown("---")
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [TAB 2: 네이버 블로그 원고] ====================
-with tab2:
-    st.subheader("📝 네이버 블로그 포스팅 원고 (SEO 최적화)")
-    if st.button("📝 블로그 원고 생성하기", type="primary", use_container_width=True, key="btn_blog"):
+else:
+    st.markdown("#### 📝 네이버 블로그 원고 작성 모드")
+    generate_blog = st.button("📝 블로그 원고 생성하기", use_container_width=True, key="btn_blog_generate")
+    
+    if generate_blog:
         if not brand_name or not product_usp:
-            st.warning("사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
+            st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
         else:
             with st.spinner("네이버 뷰티 인플루언서 스타일로 SEO 최적화 블로그 원고를 작성 중입니다..."):
                 url_context = get_url_context()
@@ -422,7 +508,7 @@ with tab2:
                             temperature=0.4,
                         )
                     )
-                    st.success("📝 네이버 블로그 원고가 성공적으로 완성되었습니다!")
+                    st.success("📝 블로그 원고가 성공적으로 완성되었습니다!")
                     st.text_area("📋 블로그/워드 복사용 (전체 선택 후 복사)", response.text, height=400)
                     st.markdown("---")
                     st.markdown(response.text)
