@@ -41,14 +41,14 @@ if "blog_photo_count" not in st.session_state:
 
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 CSS 스타일링] ====================
+# ==================== [2. 테마 컬러 완벽 동기화] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
-slider_active_color = "#e6683c" if is_insta else naver_green
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
+active_color = "#e6683c" if is_insta else "#03C75A"
 
 st.markdown(f"""
 <style>
@@ -239,34 +239,13 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 스타일 (마커 및 양 끝 숫자 완전 삭제) */
-    div[data-testid="stSlider"] {{
-        margin-bottom: 14px !important;
-    }}
-    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 6px !important;
-        margin-bottom: 6px !important;
-    }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #383c46 !important;
-        height: 6px !important;
-        border-radius: 4px !important;
-    }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
-        background: {slider_active_color} !important;
-    }}
-    div[data-testid="stSlider"] div[role="slider"] {{
-        background: {slider_active_color} !important;
-        border: 2.5px solid #ffffff !important;
-        width: 18px !important;
-        height: 18px !important;
-        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.8)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.8)'} !important;
-    }}
-    /* 호버 시 나타나는 시작/끝점 숫자 및 툴팁 완전 숨김 */
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
-        display: none !important;
+    /* 6. 선택형 숫자 버튼 크기 및 스타일 완벽 통일화 */
+    section[data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] button {{
+        height: 38px !important;
+        border-radius: 8px !important;
+        font-weight: 800 !important;
+        font-size: 13px !important;
+        transition: all 0.1s ease-in-out !important;
     }}
 
     /* 7. 결과창 헤더 뱃지 */
@@ -535,11 +514,66 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 적용 (마커 및 양 끝 숫자 완전 삭제된 깔끔한 기본 슬라이더)
+    # ==================== [완벽히 테마 컬러가 적용되는 균등 버튼 셀렉터] ====================
     if is_insta:
-        st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        st.markdown(f"""
+        <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
+            인스타 영상 장면 수 (6~12장) - 선택됨: <b style="color:{active_color}; font-size:15px;">{st.session_state.insta_scene_count}개</b>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        cols = st.columns(7)
+        for i, val in enumerate(range(6, 13)):
+            with cols[i]:
+                is_selected = (st.session_state.insta_scene_count == val)
+                btn_label = f"🔥 {val}" if is_selected else str(val)
+                
+                # 선택된 버튼은 인스타 그라데이션 적용 스타일 명시
+                if is_selected:
+                    st.markdown(f"""
+                    <style>
+                        div.stButton > button[key="insta_btn_{val}"] {{
+                            background: {insta_gradient} !important;
+                            color: white !important;
+                            border: 2px solid #ffffff !important;
+                        }}
+                    </style>
+                    """, unsafe_allow_html=True)
+
+                if st.button(str(val), key=f"insta_btn_{val}", use_container_width=True):
+                    st.session_state.insta_scene_count = val
+                    st.rerun()
     else:
-        st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        st.markdown(f"""
+        <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
+            블로그 사진 장수 (8~20장) - 선택됨: <b style="color:{active_color}; font-size:15px;">{st.session_state.blog_photo_count}장</b>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        photo_vals = list(range(8, 21))
+        row1_cols = st.columns(7)
+        row2_cols = st.columns(6)
+        
+        for i, val in enumerate(photo_vals):
+            target_col = row1_cols[i] if i < 7 else row2_cols[i - 7]
+            with target_col:
+                is_selected = (st.session_state.blog_photo_count == val)
+                if is_selected:
+                    st.markdown(f"""
+                    <style>
+                        div.stButton > button[key="blog_btn_{val}"] {{
+                            background: {naver_green} !important;
+                            color: white !important;
+                            border: 2px solid #ffffff !important;
+                        }}
+                    </style>
+                    """, unsafe_allow_html=True)
+
+                if st.button(str(val), key=f"blog_btn_{val}", use_container_width=True):
+                    st.session_state.blog_photo_count = val
+                    st.rerun()
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
