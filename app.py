@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-st.set_page_config(page_title="뷰티 콘텐츠 생성기", layout="wide")
+st.set_page_config(page_title="라미럽", layout="wide")
 
 # 세션 상태 초기화
 if "brand_name" not in st.session_state:
@@ -29,88 +29,70 @@ if "event_info" not in st.session_state:
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
 
-# 색상 강제 적용 커스텀 CSS
-st.markdown("""
+# 색상 강제 주입 글로벌 CSS
+is_insta_active = (st.session_state.content_mode == "instagram")
+
+st.markdown(f"""
 <style>
-    /* 상단 탭: 인스타그램 선택 활성화 */
-    .insta-tab-active button {
-        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888) !important;
-        color: #ffffff !important;
-        font-size: 19px !important;
+    /* 깔끔한 라미럽 메인 타이틀 */
+    .brand-title {{
+        font-size: 28px !important;
         font-weight: 800 !important;
-        border: none !important;
-        border-radius: 10px !important;
-        height: 52px !important;
-        box-shadow: 0 4px 10px rgba(220, 39, 67, 0.3) !important;
-    }
-    
-    /* 상단 탭: 인스타그램 비활성화 */
-    .insta-tab-inactive button {
-        background-color: #f1f3f5 !important;
-        color: #495057 !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        border: 1px solid #ced4da !important;
-        border-radius: 10px !important;
-        height: 52px !important;
-    }
+        color: #111111 !important;
+        margin-bottom: 20px !important;
+        letter-spacing: -0.5px !important;
+    }}
 
-    /* 상단 탭: 네이버 블로그 선택 활성화 */
-    .blog-tab-active button {
-        background-color: #03C75A !important;
-        color: #ffffff !important;
-        font-size: 19px !important;
+    /* 메인 2분할 탭 버튼 색상 강제 지정 */
+    div[data-testid="stHorizontalBlock"] > div:nth-child(1) button {{
+        background: {'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' if is_insta_active else '#f1f3f5'} !important;
+        color: {'#ffffff' if is_insta_active else '#495057'} !important;
+        font-size: 18px !important;
         font-weight: 800 !important;
-        border: none !important;
-        border-radius: 10px !important;
         height: 52px !important;
-        box-shadow: 0 4px 10px rgba(3, 199, 90, 0.3) !important;
-    }
-    
-    /* 상단 탭: 네이버 블로그 비활성화 */
-    .blog-tab-inactive button {
-        background-color: #f1f3f5 !important;
-        color: #495057 !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        border: 1px solid #ced4da !important;
+        border: {'none' if is_insta_active else '1px solid #ced4da'} !important;
         border-radius: 10px !important;
-        height: 52px !important;
-    }
+        box-shadow: {'0 4px 12px rgba(220, 39, 67, 0.35)' if is_insta_active else 'none'} !important;
+    }}
 
-    /* 하단 대본 생성 실행 버튼: 인스타그램 */
-    .insta-generate-box button {
-        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {{
+        background: {'#03C75A' if not is_insta_active else '#f1f3f5'} !important;
+        color: {'#ffffff' if not is_insta_active else '#495057'} !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        height: 52px !important;
+        border: {'none' if not is_insta_active else '1px solid #ced4da'} !important;
+        border-radius: 10px !important;
+        box-shadow: {'0 4px 12px rgba(3, 199, 90, 0.35)' if not is_insta_active else 'none'} !important;
+    }}
+
+    /* 하단 대본/원고 생성 실행 버튼 색상 */
+    div[data-testid="stMainBlockContainer"] div.stButton > button[kind="primary"] {{
+        background: {
+            "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" 
+            if is_insta_active else "#03C75A"
+        } !important;
         color: #ffffff !important;
         font-size: 20px !important;
         font-weight: 800 !important;
         border: none !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.35) !important;
         height: 56px !important;
-    }
+        box-shadow: {
+            "0 4px 15px rgba(220, 39, 67, 0.4)" 
+            if is_insta_active else "0 4px 15px rgba(3, 199, 90, 0.4)"
+        } !important;
+    }}
 
-    /* 하단 대본 생성 실행 버튼: 블로그 */
-    .blog-generate-box button {
-        background-color: #03C75A !important;
-        color: #ffffff !important;
-        font-size: 20px !important;
-        font-weight: 800 !important;
-        border: none !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.35) !important;
-        height: 56px !important;
-    }
-
-    .insta-generate-box button:hover, .blog-generate-box button:hover,
-    .insta-tab-active button:hover, .blog-tab-active button:hover {
-        opacity: 0.93 !important;
+    div.stButton > button:hover {{
+        opacity: 0.92 !important;
         transform: translateY(-1px);
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("✨ 뷰티 인스타그램 대본 & 블로그 원고 생성기")
+# 타이틀 출력
+st.markdown('<div class="brand-title">라미럽</div>', unsafe_allow_html=True)
 
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
@@ -248,29 +230,21 @@ def get_url_context():
 col1, col2 = st.columns(2)
 
 with col1:
-    insta_class = "insta-tab-active" if st.session_state.content_mode == "instagram" else "insta-tab-inactive"
-    st.markdown(f'<div class="{insta_class}">', unsafe_allow_html=True)
-    if st.button("인스타그램", use_container_width=True):
+    if st.button("인스타그램", use_container_width=True, key="tab_insta"):
         st.session_state.content_mode = "instagram"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    blog_class = "blog-tab-active" if st.session_state.content_mode == "blog" else "blog-tab-inactive"
-    st.markdown(f'<div class="{blog_class}">', unsafe_allow_html=True)
-    if st.button("블로그", use_container_width=True):
+    if st.button("블로그", use_container_width=True, key="tab_blog"):
         st.session_state.content_mode = "blog"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
 # ==================== [선택된 모드에 따른 생성 실행] ====================
 
 if st.session_state.content_mode == "instagram":
-    st.markdown('<div class="insta-generate-box">', unsafe_allow_html=True)
-    generate_insta = st.button("📸 인스타그램 대본 생성하기", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    generate_insta = st.button("인스타그램 대본 생성하기", type="primary", use_container_width=True, key="btn_insta_main")
     
     if generate_insta:
         if not brand_name or not product_usp:
@@ -405,7 +379,7 @@ if st.session_state.content_mode == "instagram":
                             temperature=0.4,
                         )
                     )
-                    st.success("📸 인스타그램 대본이 성공적으로 완성되었습니다!")
+                    st.success("인스타그램 대본이 성공적으로 완성되었습니다!")
                     st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
                     st.markdown("---")
                     st.markdown(response.text)
@@ -413,9 +387,7 @@ if st.session_state.content_mode == "instagram":
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
 else:
-    st.markdown('<div class="blog-generate-box">', unsafe_allow_html=True)
-    generate_blog = st.button("📝 블로그 원고 생성하기", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    generate_blog = st.button("블로그 원고 생성하기", type="primary", use_container_width=True, key="btn_blog_main")
     
     if generate_blog:
         if not brand_name or not product_usp:
@@ -529,7 +501,7 @@ else:
                             temperature=0.4,
                         )
                     )
-                    st.success("📝 블로그 원고가 성공적으로 완성되었습니다!")
+                    st.success("블로그 원고가 성공적으로 완성되었습니다!")
                     st.text_area("📋 블로그/워드 복사용 (전체 선택 후 복사)", response.text, height=400)
                     st.markdown("---")
                     st.markdown(response.text)
