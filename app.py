@@ -46,7 +46,6 @@ insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #
 naver_green = "#03C75A"
 current_theme_color = insta_gradient if is_insta else naver_green
 
-# CSS 강화: 슬라이더 눈금(TICK MARKS) 및 줄자형 라벨 선명화
 st.markdown(f"""
 <style>
     /* 1. 중앙 정렬 RAMILOVE 타이틀 */
@@ -236,46 +235,46 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. [강화] 줄자형 눈금 마커(Tick Marks) 및 모든 라벨 숫자 세로 정렬 선명화 */
+    /* 6. 슬라이더: 숫자 줄바꿈 방지 + 줄자 눈금 점(Tick Dots) 완벽 표시 */
     div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 25px !important;
-        margin-bottom: 25px !important;
+        margin-top: 8px !important;
+        margin-bottom: 12px !important;
     }}
-    
-    /* 슬라이더 트랙 배경에 은은한 줄자 눈금 강제 삽입 */
+
+    /* 슬라이더 트랙 배경에 각 단위마다 선명한 도트(마커) 패턴 주입 */
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background: {'repeating-linear-gradient(to right, transparent, transparent 1px, rgba(255,255,255,0.05) 1px, rgba(255,255,255,0.05) calc(100% / 6 - 1px), rgba(255,255,255,0.15) calc(100% / 6 - 1px), rgba(255,255,255,0.15) calc(100% / 6))' if is_insta else 'repeating-linear-gradient(to right, transparent, transparent 1px, rgba(255,255,255,0.05) 1px, rgba(255,255,255,0.05) calc(100% / 12 - 1px), rgba(255,255,255,0.15) calc(100% / 12 - 1px), rgba(255,255,255,0.15) calc(100% / 12))'} !important;
-        height: 12px !important;
+        background-color: #383c45 !important;
+        background-image: {'radial-gradient(circle, #a0a6b2 2px, transparent 2.5px)'} !important;
+        background-size: {'calc(100% / 6) 100%' if is_insta else 'calc(100% / 12) 100%'} !important;
+        background-position: center left !important;
+        background-repeat: repeat-x !important;
+        height: 8px !important;
         border-radius: 6px !important;
     }}
 
-    /* 마커(Tick Dot) 선명화 */
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] > div {{
-        background-color: #636976 !important;
-        width: 5px !important;
-        height: 5px !important;
-        border-radius: 50% !important;
-        margin-top: -1px !important;
-        opacity: 0.8 !important;
+    /* 슬라이더 핸들(노브) 스타일 */
+    div[data-testid="stSlider"] div[role="slider"] {{
+        background: {naver_green if not is_insta else '#ff4b72'} !important;
+        border: 2.5px solid #ffffff !important;
+        width: 20px !important;
+        height: 20px !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.6) !important;
     }}
-    
-    /* [핵심] 모든 라벨 숫자 세로 정렬 및 선명화 */
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] + div > div {{
-        opacity: 1 !important;
-        color: #ffffff !important;
+
+    /* [해결] 숫자 12, 15, 20이 아래로 쪼개지는 현상 방지 */
+    div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
+    div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
+    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        min-width: 32px !important;
+        width: auto !important;
+        color: #d1d5db !important;
         font-size: 13px !important;
         font-weight: 800 !important;
-        font-family: Arial, sans-serif !important;
-        transform: translateX(-50%) translateY(5px) !important;
-        visibility: visible !important;
-        display: block !important;
-    }}
-    
-    /* 선택된 현재 숫자 마커 강조 */
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] + div > div[aria-hidden="false"] {{
-        color: {current_theme_color} !important;
-        font-size: 14px !important;
-        margin-top: -1px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        margin-top: 4px !important;
+        text-align: center !important;
     }}
 
     /* 7. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
@@ -476,8 +475,8 @@ with st.sidebar:
 
                 contents = []
                 if uploaded_images:
-                    for img_file in uploaded_images:
-                        contents.append(Image.open(img_file))
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 
                 extract_prompt = f"""
 제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 정밀 분석하여 실제 화장품/제품에 대한 정보를 정확히 추출하세요.
@@ -526,18 +525,11 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # [수정] 줄자형 눈금 마커가 선명하게 표시되는 select_slider 적용
+    # 슬라이더: key 직접 바인딩으로 부드러운 즉시 이동
     if is_insta:
-        scene_options = list(range(6, 13))  # 6 ~ 12
-        if st.session_state.insta_scene_count not in scene_options:
-            st.session_state.insta_scene_count = 7
-        # key를 직접 연결하여 즉시 상태 반영 및 튕김 제거
-        st.select_slider("인스타 영상 장면 수", options=scene_options, key="insta_scene_count")
+        st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
-        photo_options = list(range(8, 21))  # 8 ~ 20
-        if st.session_state.blog_photo_count not in photo_options:
-            st.session_state.blog_photo_count = 15
-        st.select_slider("블로그 사진 장수", options=photo_options, key="blog_photo_count")
+        st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -702,7 +694,13 @@ if generate_action:
 (1번 씬부터 {target_scenes}번 씬까지 순서대로 요약):
 장면： (1번 씬 연출 요약)
 ...
-장면： ({target_scenes}번 씬 연출 요약)Outer-Script context ends.
+장면： ({target_scenes}번 씬 연출 요약)
+
+
+
+나레이션만 정리
+(1번부터 {target_scenes}번 씬까지의 전체 나레이션을 모아서
+각 문장별 20~30자 내외 줄바꿈하여 출력)
 """
                 prompt_text = f"""
 다음 정보를 바탕으로 위 템플릿과 [카테고리: {current_cat}], [정확히 {target_scenes}개 장면 구성], [자막 서술형 금지 / 명사형 요약], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
