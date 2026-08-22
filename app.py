@@ -29,71 +29,83 @@ if "event_info" not in st.session_state:
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
 
-# 커스텀 CSS
+# 색상 강제 적용 커스텀 CSS
 st.markdown("""
 <style>
-    /* 상단 인스타그램 모드 선택 버튼 */
-    div.stButton > button[key="tab_insta_active"] {
+    /* 상단 탭: 인스타그램 선택 활성화 */
+    .insta-tab-active button {
         background: linear-gradient(45deg, #f09433, #dc2743, #bc1888) !important;
-        color: white !important;
-        font-size: 18px !important;
+        color: #ffffff !important;
+        font-size: 19px !important;
         font-weight: 800 !important;
-        padding: 12px 0px !important;
-        border-radius: 10px !important;
         border: none !important;
-    }
-    div.stButton > button[key="tab_insta_inactive"] {
-        background-color: #f8f9fa !important;
-        color: #666666 !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        padding: 12px 0px !important;
         border-radius: 10px !important;
-        border: 1px solid #ddd !important;
+        height: 52px !important;
+        box-shadow: 0 4px 10px rgba(220, 39, 67, 0.3) !important;
     }
     
-    /* 상단 블로그 모드 선택 버튼 */
-    div.stButton > button[key="tab_blog_active"] {
-        background-color: #03C75A !important;
-        color: white !important;
-        font-size: 18px !important;
-        font-weight: 800 !important;
-        padding: 12px 0px !important;
-        border-radius: 10px !important;
-        border: none !important;
-    }
-    div.stButton > button[key="tab_blog_inactive"] {
-        background-color: #f8f9fa !important;
-        color: #666666 !important;
+    /* 상단 탭: 인스타그램 비활성화 */
+    .insta-tab-inactive button {
+        background-color: #f1f3f5 !important;
+        color: #495057 !important;
         font-size: 18px !important;
         font-weight: 600 !important;
-        padding: 12px 0px !important;
+        border: 1px solid #ced4da !important;
         border-radius: 10px !important;
-        border: 1px solid #ddd !important;
+        height: 52px !important;
     }
 
-    /* 하단 인스타그램 생성 실행 버튼 */
-    div.stButton > button[key="btn_insta_generate"] {
-        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
-        color: white !important;
-        font-size: 19px !important;
-        font-weight: 800 !important;
-        padding: 14px 20px !important;
-        border-radius: 12px !important;
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3) !important;
-    }
-
-    /* 하단 네이버 블로그 생성 실행 버튼 */
-    div.stButton > button[key="btn_blog_generate"] {
+    /* 상단 탭: 네이버 블로그 선택 활성화 */
+    .blog-tab-active button {
         background-color: #03C75A !important;
-        color: white !important;
+        color: #ffffff !important;
         font-size: 19px !important;
         font-weight: 800 !important;
-        padding: 14px 20px !important;
-        border-radius: 12px !important;
         border: none !important;
-        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.3) !important;
+        border-radius: 10px !important;
+        height: 52px !important;
+        box-shadow: 0 4px 10px rgba(3, 199, 90, 0.3) !important;
+    }
+    
+    /* 상단 탭: 네이버 블로그 비활성화 */
+    .blog-tab-inactive button {
+        background-color: #f1f3f5 !important;
+        color: #495057 !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 10px !important;
+        height: 52px !important;
+    }
+
+    /* 하단 대본 생성 실행 버튼: 인스타그램 */
+    .insta-generate-box button {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+        color: #ffffff !important;
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.35) !important;
+        height: 56px !important;
+    }
+
+    /* 하단 대본 생성 실행 버튼: 블로그 */
+    .blog-generate-box button {
+        background-color: #03C75A !important;
+        color: #ffffff !important;
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.35) !important;
+        height: 56px !important;
+    }
+
+    .insta-generate-box button:hover, .blog-generate-box button:hover,
+    .insta-tab-active button:hover, .blog-tab-active button:hover {
+        opacity: 0.93 !important;
+        transform: translateY(-1px);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -236,23 +248,29 @@ def get_url_context():
 col1, col2 = st.columns(2)
 
 with col1:
-    insta_key = "tab_insta_active" if st.session_state.content_mode == "instagram" else "tab_insta_inactive"
-    if st.button("인스타그램", use_container_width=True, key=insta_key):
+    insta_class = "insta-tab-active" if st.session_state.content_mode == "instagram" else "insta-tab-inactive"
+    st.markdown(f'<div class="{insta_class}">', unsafe_allow_html=True)
+    if st.button("인스타그램", use_container_width=True):
         st.session_state.content_mode = "instagram"
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    blog_key = "tab_blog_active" if st.session_state.content_mode == "blog" else "tab_blog_inactive"
-    if st.button("블로그", use_container_width=True, key=blog_key):
+    blog_class = "blog-tab-active" if st.session_state.content_mode == "blog" else "blog-tab-inactive"
+    st.markdown(f'<div class="{blog_class}">', unsafe_allow_html=True)
+    if st.button("블로그", use_container_width=True):
         st.session_state.content_mode = "blog"
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
 # ==================== [선택된 모드에 따른 생성 실행] ====================
 
 if st.session_state.content_mode == "instagram":
-    generate_insta = st.button("📸 인스타그램 대본 생성하기", use_container_width=True, key="btn_insta_generate")
+    st.markdown('<div class="insta-generate-box">', unsafe_allow_html=True)
+    generate_insta = st.button("📸 인스타그램 대본 생성하기", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if generate_insta:
         if not brand_name or not product_usp:
@@ -395,7 +413,9 @@ if st.session_state.content_mode == "instagram":
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
 else:
-    generate_blog = st.button("📝 블로그 원고 생성하기", use_container_width=True, key="btn_blog_generate")
+    st.markdown('<div class="blog-generate-box">', unsafe_allow_html=True)
+    generate_blog = st.button("📝 블로그 원고 생성하기", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if generate_blog:
         if not brand_name or not product_usp:
