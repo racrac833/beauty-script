@@ -235,20 +235,25 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 줄자형 눈금 마커(Tick Marks) 및 트랙 스타일 */
+    /* 6. 줄자형 눈금 마커(Tick Mark) 및 슬라이더 커스텀 */
     div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 4px !important;
-        margin-bottom: 6px !important;
-    }}
-    div[data-testid="stSlider"] div[data-baseweb="slider"] > div:first-child {{
-        background: {'repeating-linear-gradient(to right, #4a4f59, #4a4f59 calc(100% / 6 - 2px), #757b88 calc(100% / 6 - 2px), #757b88 calc(100% / 6))' if is_insta else 'repeating-linear-gradient(to right, #4a4f59, #4a4f59 calc(100% / 12 - 2px), #757b88 calc(100% / 12 - 2px), #757b88 calc(100% / 12))'} !important;
-        height: 6px !important;
-        border-radius: 4px !important;
+        margin-top: 6px !important;
+        margin-bottom: 10px !important;
     }}
     div[data-testid="stSlider"] div[role="slider"] {{
         background: {naver_green if not is_insta else '#ff4b72'} !important;
-        border: 2px solid #ffffff !important;
-        box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+        border: 2.5px solid #ffffff !important;
+        width: 18px !important;
+        height: 18px !important;
+        box-shadow: 0 0 10px rgba(0,0,0,0.6) !important;
+    }}
+    /* 하단 눈금 라벨 강조 */
+    div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
+    div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
+    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
+        color: #a0a6b2 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
     }}
 
     /* 7. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
@@ -449,8 +454,8 @@ with st.sidebar:
 
                 contents = []
                 if uploaded_images:
-                    for img_file in uploaded_images:
-                        contents.append(Image.open(img_file))
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 
                 extract_prompt = f"""
 제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 정밀 분석하여 실제 화장품/제품에 대한 정보를 정확히 추출하세요.
@@ -499,11 +504,17 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 모드별 분량 슬라이더 (줄자 눈금 적용 및 1회 터치 즉시 이동)
+    # 줄자형 눈금 마커가 선명하게 표시되는 select_slider 적용
     if is_insta:
-        st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        scene_options = list(range(6, 13))  # 6 ~ 12
+        if st.session_state.insta_scene_count not in scene_options:
+            st.session_state.insta_scene_count = 7
+        st.select_slider("인스타 영상 장면 수", options=scene_options, key="insta_scene_count")
     else:
-        st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        photo_options = list(range(8, 21))  # 8 ~ 20
+        if st.session_state.blog_photo_count not in photo_options:
+            st.session_state.blog_photo_count = 15
+        st.select_slider("블로그 사진 장수", options=photo_options, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
