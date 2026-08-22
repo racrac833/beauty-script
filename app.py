@@ -41,7 +41,24 @@ if "blog_photo_count" not in st.session_state:
 
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 완벽 고정 크기 HTML/CSS 선택 바] ====================
+# HTML 내에서 클릭된 값을 파이썬으로 안전하게 전달받기 위한 쿼리 파라미터 처리
+query_params = st.query_params
+if "set_insta" in query_params:
+    try:
+        st.session_state.insta_scene_count = int(query_params["set_insta"])
+        st.query_params.clear()
+        st.rerun()
+    except Exception:
+        pass
+if "set_blog" in query_params:
+    try:
+        st.session_state.blog_photo_count = int(query_params["set_blog"])
+        st.query_params.clear()
+        st.rerun()
+    except Exception:
+        pass
+
+# ==================== [2. 테마 컬러 및 완벽 동일 크기 그리드 스타일링] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
@@ -239,24 +256,24 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. [핵심] 숫자 박스 크기 100% 동일 고정 및 흔들림 방지 그리드 */
-    .number-grid {{
+    /* 6. [핵심] 100% 동일한 크기와 흔들림 없는 완벽 그리드 박스 */
+    .uniform-grid-7 {{
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 6px;
         margin-bottom: 15px;
         width: 100%;
     }}
-    .number-grid-blog {{
+    .uniform-grid-6 {{
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: 6px;
         margin-bottom: 15px;
         width: 100%;
     }}
-    .num-box {{
+    .box-item {{
         background: #22252b;
-        border: 1.5px solid #3d424b;
+        border: 1px solid #3d424b;
         border-radius: 8px;
         height: 38px;
         display: flex;
@@ -265,16 +282,15 @@ st.markdown(f"""
         color: #b0b5c1;
         font-size: 14px;
         font-weight: 800;
-        cursor: pointer;
+        text-decoration: none !important;
         transition: all 0.1s ease-in-out;
         user-select: none;
-        text-decoration: none;
     }}
-    .num-box:hover {{
+    .box-item:hover {{
         border-color: {active_color};
         color: #ffffff;
     }}
-    .num-box.active {{
+    .box-item.active {{
         background: {theme_bg} !important;
         color: #ffffff !important;
         border: 2px solid #ffffff !important;
@@ -556,36 +572,13 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
         
-        # 쿼리스트링 대신 Streamlit 버튼 클릭으로 상태를 갱신하는 깔끔한 Grid 구현
-        cols = st.columns(7)
-        for i, val in enumerate(range(6, 13)):
-            with cols[i]:
-                is_selected = (st.session_state.insta_scene_count == val)
-                if is_selected:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="insta_box_{val}"] {{
-                            background: {insta_gradient} !important;
-                            color: white !important;
-                            border: 2px solid #ffffff !important;
-                            font-weight: 900 !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="insta_box_{val}"] {{
-                            background: #22252b !important;
-                            color: #b0b5c1 !important;
-                            border: 1px solid #3d424b !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-
-                if st.button(str(val), key=f"insta_box_{val}", use_container_width=True):
-                    st.session_state.insta_scene_count = val
-                    st.rerun()
+        # HTML 그리드로 100% 균일한 크기 박스 구현
+        html_grid = '<div class="uniform-grid-7">'
+        for val in range(6, 13):
+            active_cls = " active" if st.session_state.insta_scene_count == val else ""
+            html_grid += f'<a href="?set_insta={val}" class="box-item{active_cls}">{val}</a>'
+        html_grid += '</div>'
+        st.markdown(html_grid, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
@@ -594,39 +587,21 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
         
+        # 블로그는 13개이므로 7개 / 6개 줄로 나누어 완벽 고정 크기로 렌더링
         photo_vals = list(range(8, 21))
-        row1_cols = st.columns(7)
-        row2_cols = st.columns(6)
+        html_grid1 = '<div class="uniform-grid-7">'
+        for val in photo_vals[:7]:
+            active_cls = " active" if st.session_state.blog_photo_count == val else ""
+            html_grid1 += f'<a href="?set_blog={val}" class="box-item{active_cls}">{val}</a>'
+        html_grid1 += '</div>'
         
-        for i, val in enumerate(photo_vals):
-            target_col = row1_cols[i] if i < 7 else row2_cols[i - 7]
-            with target_col:
-                is_selected = (st.session_state.blog_photo_count == val)
-                if is_selected:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="blog_box_{val}"] {{
-                            background: {naver_green} !important;
-                            color: white !important;
-                            border: 2px solid #ffffff !important;
-                            font-weight: 900 !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="blog_box_{val}"] {{
-                            background: #22252b !important;
-                            color: #b0b5c1 !important;
-                            border: 1px solid #3d424b !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-
-                if st.button(str(val), key=f"blog_box_{val}", use_container_width=True):
-                    st.session_state.blog_photo_count = val
-                    st.rerun()
+        html_grid2 = '<div class="uniform-grid-6">'
+        for val in photo_vals[7:]:
+            active_cls = " active" if st.session_state.blog_photo_count == val else ""
+            html_grid2 += f'<a href="?set_blog={val}" class="box-item{active_cls}">{val}</a>'
+        html_grid2 += '</div>'
+        
+        st.markdown(html_grid1 + html_grid2, unsafe_allow_html=True)
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
