@@ -39,19 +39,15 @@ if "insta_scene_count" not in st.session_state:
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
-# 기본 변수 안전 초기화
-generate_action = False
-
-# ==================== [2. 테마 컬러 및 CSS 스타일링] ====================
+# ==================== [2. 테마 컬러 완벽 동기화] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
+slider_fill_bg = insta_gradient if is_insta else naver_green
 theme_color = "#e6683c" if is_insta else "#03C75A"
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
-
-slider_step_count = 6 if is_insta else 12
 
 st.markdown(f"""
 <style>
@@ -242,7 +238,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 트랙 내부 내장 도트 눈금 마커 */
+    /* 6. 슬라이더 테마 컬러 완벽 동기화 (인스타 그라데이션 / 블로그 네이버 그린) */
     div[data-testid="stSlider"] {{
         margin-bottom: 14px !important;
     }}
@@ -252,24 +248,20 @@ st.markdown(f"""
     }}
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
         background-color: #383c46 !important;
-        background-image: radial-gradient(circle, #a1a7b4 2.5px, transparent 3px) !important;
-        background-size: calc(100% / {slider_step_count}) 100% !important;
-        background-position: center left !important;
-        background-repeat: repeat-x !important;
         height: 6px !important;
         border-radius: 4px !important;
     }}
+    /* 슬라이더 채워진 바(Progress) 컬러 강제 동기화 */
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
+        background: {slider_fill_bg} !important;
+    }}
+    /* 슬라이더 손잡이(노브) 컬러 강제 동기화 */
     div[data-testid="stSlider"] div[role="slider"] {{
         background: {theme_color} !important;
         border: 2.5px solid #ffffff !important;
         width: 18px !important;
         height: 18px !important;
         box-shadow: {'0 0 8px rgba(220, 39, 67, 0.8)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.8)'} !important;
-    }}
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
-        display: none !important;
     }}
 
     /* 7. 결과창 헤더 뱃지 */
@@ -538,7 +530,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더: 트랙 내장 도트 눈금
+    # 슬라이더 설정
     if is_insta:
         st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
@@ -562,6 +554,8 @@ def get_url_context():
         if p_text:
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
+
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
 # ==================== [5. 대본 / 원고 생성 로직] ====================
 if generate_action:
