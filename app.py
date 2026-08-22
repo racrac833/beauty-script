@@ -235,7 +235,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더: 기본 라벨 완전 제거 및 슬림 트랙 */
+    /* 6. 슬라이더: 트랙 및 노브 스타일 */
     div[data-testid="stSlider"] {{
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
@@ -244,6 +244,8 @@ st.markdown(f"""
         margin-top: 4px !important;
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
     }}
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
         background-color: #3b3f49 !important;
@@ -251,11 +253,11 @@ st.markdown(f"""
         border-radius: 4px !important;
     }}
     div[data-testid="stSlider"] div[role="slider"] {{
-        background: {naver_green if not is_insta else '#ff4b72'} !important;
+        background: {insta_gradient if is_insta else naver_green} !important;
         border: 2px solid #ffffff !important;
         width: 18px !important;
         height: 18px !important;
-        box-shadow: 0 0 8px rgba(0,0,0,0.5) !important;
+        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.6)'} !important;
     }}
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
@@ -263,35 +265,38 @@ st.markdown(f"""
         display: none !important;
     }}
 
-    /* 7. 줄자형 눈금 점(마커) 컨테이너: 슬라이더 노브 중심과 1:1 완벽 밀착 및 일치 */
+    /* 7. 줄자형 눈금 점(마커): 슬라이더 바로 아래 초밀착 배치 */
     .ruler-dot-wrapper {{
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        width: 100% !important;
-        padding: 0 9px !important; /* 슬라이더 노브 18px의 반지름(9px)과 완벽 일치 */
-        margin-top: 3px !important; /* 슬라이더 바로 아래 초밀착 */
+        width: calc(100% - 18px) !important;
+        margin-left: 9px !important;
+        margin-right: 9px !important;
+        margin-top: -14px !important; /* 슬라이더 바 바로 밑으로 초밀착 */
         margin-bottom: 14px !important;
         box-sizing: border-box !important;
+        position: relative !important;
+        z-index: 1 !important;
     }}
     .ruler-dot-item {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        width: 6px !important;
+        width: 0px !important;
         height: 6px !important;
     }}
     .ruler-dot {{
         width: 4px !important;
         height: 4px !important;
         border-radius: 50% !important;
-        background-color: #656a76 !important;
+        background-color: #555a66 !important;
         transition: all 0.15s ease-in-out !important;
     }}
     .ruler-dot.active {{
-        background-color: {'#ff4b72' if is_insta else '#00ff6f'} !important;
-        box-shadow: {'0 0 6px rgba(255, 75, 114, 0.9)' if is_insta else '0 0 6px rgba(0, 255, 111, 0.9)'} !important;
-        transform: scale(1.4) !important;
+        background: {insta_gradient if is_insta else naver_green} !important;
+        box-shadow: {'0 0 6px rgba(220, 39, 67, 0.9)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.9)'} !important;
+        transform: scale(1.6) !important;
     }}
 
     /* 8. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
@@ -542,7 +547,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # [수정] 숫자 제거 및 끝점(12/20) 슬라이더 노브 위치와 완벽 일치하는 점(Dot) 렌더링
+    # 슬라이더 및 초밀착 눈금 점(마커)
     if is_insta:
         st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
         
@@ -865,7 +870,6 @@ current_result = st.session_state.insta_result if is_insta else st.session_state
 main_title = "인스타그램 대본" if is_insta else "블로그 원고"
 config_info = f"{st.session_state.product_category} · 장면 {st.session_state.insta_scene_count}개" if is_insta else f"{st.session_state.product_category} · 사진 {st.session_state.blog_photo_count}장"
 
-# 눈에 띄는 설정값 뱃지 렌더링
 badge_html = f'<div class="result-header-wrapper"><span class="result-main-title">{main_title}</span><span class="result-config-badge"><span class="dot"></span>{config_info}</span></div>'
 st.markdown(badge_html, unsafe_allow_html=True)
 
@@ -876,3 +880,4 @@ else:
         f'<div class="empty-result-box">아직 생성된 {main_title}가 없습니다.<br>상단 중앙의 <b>하트(❤️) 버튼</b>을 누르면 생성이 시작됩니다.</div>', 
         unsafe_allow_html=True
     )
+    
