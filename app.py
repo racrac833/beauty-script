@@ -51,35 +51,35 @@ st.html(f"""
 
     /* 2. 상단 탭: INSTAGRAM */
     .st-key-tab_insta button {{
-        background: {insta_gradient if is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #333333'} !important;
+        background: {insta_gradient if is_insta else '#CCCCCC'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #999999'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
-        color: {'#ffffff' if is_insta else '#aaaaaa'} !important;
+        color: {'#ffffff' if is_insta else '#111111'} !important;
         font-size: 17px !important;
-        font-weight: 800 !important;
+        font-weight: 900 !important;
         letter-spacing: 1px !important;
     }}
 
     /* 2. 상단 탭: BLOG */
     .st-key-tab_blog button {{
-        background: {naver_green if not is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #333333'} !important;
+        background: {naver_green if not is_insta else '#CCCCCC'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #999999'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
-        color: {'#ffffff' if not is_insta else '#aaaaaa'} !important;
+        color: {'#ffffff' if not is_insta else '#111111'} !important;
         font-size: 17px !important;
-        font-weight: 800 !important;
+        font-weight: 900 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 70% 축소 (98px 정원형) */
+    /* 3. 하단 중앙 생성 버튼: 정원형(98px) + 단 1개의 하트 정중앙 렌더링 */
     .st-key-btn_generate_main button {{
         width: 98px !important;
         height: 98px !important;
@@ -93,26 +93,26 @@ st.html(f"""
         } !important;
         transition: all 0.25s ease-in-out !important;
         margin: 0 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        position: relative !important;
         padding: 0 !important;
+        overflow: hidden !important;
     }}
 
-    /* 버튼 기본 글씨 숨김 처리 (순수 SVG 하트만 노출) */
-    .st-key-btn_generate_main button p, .st-key-btn_generate_main button span {{
-        font-size: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+    /* 버튼 내부 텍스트 완전 숨김 */
+    .st-key-btn_generate_main button * {{
+        display: none !important;
     }}
 
-    /* SVG 하트 아이콘 강제 주입 */
-    .st-key-btn_generate_main button p::after, .st-key-btn_generate_main button span::after {{
+    /* 최상위 button 가상요소로 딱 1개의 SVG 하트 정중앙 배치 */
+    .st-key-btn_generate_main button::after {{
         content: "" !important;
         display: block !important;
-        width: 36px !important;
-        height: 36px !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 44px !important;
+        height: 44px !important;
         background: {insta_gradient if is_insta else naver_green} !important;
         -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
         mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
@@ -296,11 +296,11 @@ with tab_col2:
 
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 70% 축소 하트 아이콘 원형 생성 버튼] ====================
+# ==================== [중앙 정렬 단일 하트 아이콘 원형 생성 버튼] ====================
 b_col1, b_col2, b_col3 = st.columns([1.8, 0.4, 1.8])
 
 with b_col2:
-    generate_action = st.button("HEART", use_container_width=True, key="btn_generate_main")
+    generate_action = st.button("EXECUTE", use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
@@ -640,4 +640,3 @@ if generate_action:
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
-                    
