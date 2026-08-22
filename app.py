@@ -37,12 +37,12 @@ if "event_info" not in st.session_state:
     st.session_state.event_info = ""
 
 class ExtractedGuide(BaseModel):
-    brand_name: str = Field(description="가이드/이미지/링크에서 확인된 원문 그대로의 정확한 브랜드명 (단 1글자도 변경/번역 금지)")
-    product_usp: str = Field(description="가이드에서 강조하는 제품의 핵심 USP, 특징, 효과, 성분 요약")
+    brand_name: str = Field(description="가이드/상세페이지/이미지에서 확인된 원문 그대로의 정확한 브랜드명 (단 1글자도 변경/번역 금지)")
+    product_usp: str = Field(description="제품의 핵심 USP, 제형 특성, 주요 성분 및 임상 효과 요약")
     target_audience: str = Field(description="타겟층 정보 (기본: 30대 여성)")
     essential_tags: str = Field(description="가이드에 명시된 필수 해시태그 목록 (#포함하여 쉼표로 연결)")
     account_tags: str = Field(description="가이드에 명시된 공식 계정 태그 (@포함)")
-    event_info: str = Field(description="내부 코드가 아닌 실제 소비자가 보는 행사/기획전 일정(예: 8월 1일~8월 29일), 할인 가격, 프로모션 혜택, 구매처")
+    event_info: str = Field(description="정확한 프로모션 일정(예: 8월 1일~8월 29일), 할인 가격, 혜택, 구매처")
 
 def fetch_url_content(url):
     try:
@@ -59,33 +59,42 @@ def fetch_url_content(url):
         return ""
 
 with st.sidebar:
-    st.header("1️⃣ 가이드 자료 등록")
+    st.header("1️⃣ 가이드 & 제품 자료 등록")
     uploaded_images = st.file_uploader(
         "📷 가이드라인 / 기획안 이미지 첨부", 
         type=["png", "jpg", "jpeg", "webp"], 
         accept_multiple_files=True
     )
-    reference_url = st.text_input(
-        "🔗 참고 링크 URL",
-        placeholder="https://example.com/product"
+    guideline_url = st.text_input(
+        "🔗 가이드라인 링크 URL (노션, 구글문서 등)",
+        placeholder="https://notion.so/..."
+    )
+    product_url = st.text_input(
+        "🛍️ 제품 상세페이지 링크 URL (올리브영/스마트스토어 등)",
+        placeholder="https://oliveyoung.co.kr/..."
     )
     guideline_text = st.text_area(
         "📝 추가 메모 / 가이드 텍스트 (선택)",
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
-    analyze_btn = st.button("⚡ 가이드 자동 분석 & 입력창 채우기", use_container_width=True)
+    analyze_btn = st.button("⚡ 자료 종합 분석 & 입력창 채우기", use_container_width=True)
     
     if analyze_btn:
-        if not uploaded_images and not reference_url.strip() and not guideline_text.strip():
+        if not uploaded_images and not guideline_url.strip() and not product_url.strip() and not guideline_text.strip():
             st.warning("분석할 이미지, 링크 또는 메모를 하나 이상 입력해주세요.")
         else:
-            with st.spinner("가이드 자료를 분석하여 정보를 정밀 추출 중입니다..."):
+            with st.spinner("가이드와 상세페이지를 종합 분석하여 정보를 추출 중입니다..."):
                 url_context = ""
-                if reference_url.strip():
-                    crawled_text = fetch_url_content(reference_url.strip())
-                    if crawled_text:
-                        url_context = f"\n[참고 링크 내용]:\n{crawled_text}\n"
+                if guideline_url.strip():
+                    g_text = fetch_url_content(guideline_url.strip())
+                    if g_text:
+                        url_context += f"\n[가이드라인 링크 내용]:\n{g_text}\n"
+                
+                if product_url.strip():
+                    p_text = fetch_url_content(product_url.strip())
+                    if p_text:
+                        url_context += f"\n[제품 상세페이지 내용]:\n{p_text}\n"
 
                 contents = []
                 if uploaded_images:
@@ -93,13 +102,14 @@ with st.sidebar:
                         contents.append(Image.open(img_file))
                 
                 extract_prompt = f"""
-제공된 가이드라인 이미지, 텍스트, 링크 내용을 100% 정밀 분석하여 다음 항목을 정확히 추출하세요.
+제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 100% 정밀 분석하여 다음 항목을 정확히 추출하세요.
 
 [추출 주의사항]
 1. 브랜드명: 원문 그대로 단 1글자도 변경/번역/축약하지 말고 추출
-2. 행사 정보: 가이드의 '내부 관리 코드(예: 2608올영정번 등)'로 적지 말고, 실제 소비자에게 전달할 '정확한 프로모션 기간(예: 8월 1일~8월 29일)', '할인 혜택/가격', '구매처' 형태로 정제하여 추출
-3. 필수 해시태그: 이미지 및 텍스트 전체에서 필수 해시태그(#...)를 단 하나도 빠짐없이 찾아 추출
-4. 계정 태그: 공식 인스타그램 계정(@...) 추출
+2. 제품 USP: 상세페이지와 가이드에서 강조하는 제형, 핵심 성분, 임상시험 수치, 실제 체감 장점을 매력적으로 요약
+3. 행사 정보: 가이드의 내부 코드가 아닌, 실제 소비자에게 안내할 '정확한 프로모션 기간(예: 8월 1일~8월 29일)', '할인 가격/혜택', '구매처' 형태로 정제하여 추출
+4. 필수 해시태그: 가이드 전체에서 필수 해시태그(#...)를 찾아 추출
+5. 계정 태그: 공식 인스타그램 계정(@...) 추출
 
 [추가 메모]: {guideline_text}
 {url_context}
@@ -147,15 +157,19 @@ if generate_btn:
     else:
         with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 대본을 작성 중입니다..."):
             url_context = ""
-            if reference_url.strip():
-                crawled_text = fetch_url_content(reference_url.strip())
-                if crawled_text:
-                    url_context = f"\n[참고 링크 내용]: {crawled_text}\n"
+            if guideline_url.strip():
+                g_text = fetch_url_content(guideline_url.strip())
+                if g_text:
+                    url_context += f"\n[가이드라인 링크 내용]: {g_text}\n"
+            if product_url.strip():
+                p_text = fetch_url_content(product_url.strip())
+                if p_text:
+                    url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
 
             system_instruction = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
-사용자가 제공하는 [가이드라인 이미지/텍스트, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안]을 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
+사용자가 제공하는 [가이드라인 이미지/텍스트, 제품 상세페이지 내용, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안]을 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
 
 [핵심 절대 원칙 (CRITICAL)]
 
@@ -281,7 +295,7 @@ if generate_btn:
 (1~4번 씬의 전체 나레이션 전문을 모아서 줄바꿈하여 출력 / 공백 포함 280~300자)
 """
             prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 뷰티 숏폼 대본을 작성해줘:
+다음 정보와 상세페이지 자료를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 뷰티 숏폼 대본을 작성해줘:
 - 정확한 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -309,8 +323,6 @@ if generate_btn:
                 )
                 
                 st.success("대본이 성공적으로 완성되었습니다!")
-                
-                # 워드 복사용 텍스트 박스
                 st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
                 st.markdown("---")
                 st.markdown(response.text)
