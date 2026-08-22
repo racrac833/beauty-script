@@ -39,14 +39,16 @@ if "insta_scene_count" not in st.session_state:
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
-# ==================== [2. 테마 컬러 완벽 동기화] ====================
+# 기본 변수 안전 초기화
+generate_action = False
+
+# ==================== [2. 테마 컬러 및 CSS 스타일링] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
-slider_fill_bg = insta_gradient if is_insta else naver_green
-theme_color = "#e6683c" if is_insta else "#03C75A"
+theme_color = "#dc2743" if is_insta else "#03C75A"
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
 
 st.markdown(f"""
@@ -238,33 +240,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 테마 컬러 완벽 동기화 (인스타 그라데이션 / 블로그 네이버 그린) */
-    div[data-testid="stSlider"] {{
-        margin-bottom: 14px !important;
-    }}
-    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 6px !important;
-        margin-bottom: 6px !important;
-    }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #383c46 !important;
-        height: 6px !important;
-        border-radius: 4px !important;
-    }}
-    /* 슬라이더 채워진 바(Progress) 컬러 강제 동기화 */
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
-        background: {slider_fill_bg} !important;
-    }}
-    /* 슬라이더 손잡이(노브) 컬러 강제 동기화 */
-    div[data-testid="stSlider"] div[role="slider"] {{
-        background: {theme_color} !important;
-        border: 2.5px solid #ffffff !important;
-        width: 18px !important;
-        height: 18px !important;
-        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.8)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.8)'} !important;
-    }}
-
-    /* 7. 결과창 헤더 뱃지 */
+    /* 6. 결과창 헤더 뱃지 */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -301,7 +277,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 8. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 7. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -489,7 +465,7 @@ with st.sidebar:
 [절대 주의사항 (STRICT)]
 1. '오늘룩(oneulook)', '레뷰(revu)', '체험단' 등은 마케팅 중개 플랫폼일 뿐 실제 화장품 브랜드명이 아닙니다. 절대 이를 브랜드명이나 해시태그로 추출하지 마세요.
 2. 이미지와 상세페이지에 나오는 '실제 뷰티 제품의 브랜드명(예: 엑시스와이, 넘버즈인, 아누아 등)'과 '제품명'을 정확히 추출하세요.
-3. 제품 USP: 제품의 실제 성분, 텍스처(제형), 고민 부위 해결 효과, 임상시험 수치 추출
+3. 제품 USP: 제품의 실제 성분, 제형 특성, 고민 부위 해결 효과, 임상시험 수치 추출
 4. 행사 정보: 올리브영 프로모션 일정, 할인율/가격, 구매처 추출
 5. 필수 해시태그: 가이드에 지정된 실제 제품 필수 해시태그만 추출 (플랫폼 태그 제외)
 
@@ -530,11 +506,17 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 설정
+    # 분량 설정 (모드별 직관적 선택 셀렉터 - 색상 꼬임 및 마커 버그 완전 해결)
     if is_insta:
-        st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        insta_options = list(range(6, 13))
+        if st.session_state.insta_scene_count not in insta_options:
+            st.session_state.insta_scene_count = 7
+        st.select_slider("인스타 영상 장면 수 (6~12장)", options=insta_options, key="insta_scene_count")
     else:
-        st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        blog_options = list(range(8, 21))
+        if st.session_state.blog_photo_count not in blog_options:
+            st.session_state.blog_photo_count = 15
+        st.select_slider("블로그 사진 장수 (8~20장)", options=blog_options, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -795,7 +777,7 @@ if generate_action:
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
-- 필수 해시태그: {essential_tags if essential_tags else '없음'}
+- 필수 해시태그: {essential_tags if essential_tags else '음'}
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
