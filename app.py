@@ -235,49 +235,70 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더: 숫자 줄바꿈 방지 + 줄자 눈금 점(Tick Dots) 완벽 표시 */
+    /* 6. 슬라이더: 기본 깨지는 텍스트 숨김 + 정밀 트랙 스타일 */
     div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 8px !important;
-        margin-bottom: 12px !important;
+        margin-top: 5px !important;
+        margin-bottom: 0px !important;
     }}
-
-    /* 슬라이더 트랙 배경에 각 단위마다 선명한 도트(마커) 패턴 주입 */
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #383c45 !important;
-        background-image: {'radial-gradient(circle, #a0a6b2 2px, transparent 2.5px)'} !important;
-        background-size: {'calc(100% / 6) 100%' if is_insta else 'calc(100% / 12) 100%'} !important;
-        background-position: center left !important;
-        background-repeat: repeat-x !important;
-        height: 8px !important;
-        border-radius: 6px !important;
+        background-color: #3b3f49 !important;
+        height: 6px !important;
+        border-radius: 4px !important;
     }}
-
-    /* 슬라이더 핸들(노브) 스타일 */
     div[data-testid="stSlider"] div[role="slider"] {{
         background: {naver_green if not is_insta else '#ff4b72'} !important;
-        border: 2.5px solid #ffffff !important;
-        width: 20px !important;
-        height: 20px !important;
-        box-shadow: 0 0 10px rgba(0,0,0,0.6) !important;
+        border: 2px solid #ffffff !important;
+        width: 18px !important;
+        height: 18px !important;
+        box-shadow: 0 0 8px rgba(0,0,0,0.5) !important;
     }}
-
-    /* [해결] 숫자 12, 15, 20이 아래로 쪼개지는 현상 방지 */
+    /* 기본 깨지는 라벨 숨김 (하단 커스텀 눈금바로 대체) */
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
     div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
-        white-space: nowrap !important;
-        word-break: keep-all !important;
-        min-width: 32px !important;
-        width: auto !important;
-        color: #d1d5db !important;
-        font-size: 13px !important;
-        font-weight: 800 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        margin-top: 4px !important;
-        text-align: center !important;
+        display: none !important;
     }}
 
-    /* 7. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
+    /* 7. 줄자형 눈금 마커(Tick Marks) 전용 컨테이너 */
+    .ruler-tick-container {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 0 9px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+    }}
+    .ruler-tick-item {{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }}
+    .ruler-dot {{
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #727783;
+    }}
+    .ruler-dot.active {{
+        background-color: {'#ff4b72' if is_insta else '#00ff6f'};
+        box-shadow: {'0 0 6px rgba(255, 75, 114, 0.8)' if is_insta else '0 0 6px rgba(0, 255, 111, 0.8)'};
+        transform: scale(1.3);
+    }}
+    .ruler-number {{
+        font-size: 11px;
+        font-weight: 700;
+        color: #8c92a0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }}
+    .ruler-number.active {{
+        color: #ffffff;
+        font-weight: 900;
+    }}
+
+    /* 8. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -314,7 +335,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 8. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
+    /* 9. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -475,8 +496,8 @@ with st.sidebar:
 
                 contents = []
                 if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
+                    for img_file in uploaded_images:
+                        contents.append(Image.open(img_file))
                 
                 extract_prompt = f"""
 제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 정밀 분석하여 실제 화장품/제품에 대한 정보를 정확히 추출하세요.
@@ -525,11 +546,41 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더: key 직접 바인딩으로 부드러운 즉시 이동
+    # [완벽 해결] 슬라이더 + 줄자 눈금 점(마커) 및 숫자 1:1 완벽 정렬 렌더링
     if is_insta:
-        st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        
+        # 6~12 줄자 눈금 마커 바 생성
+        tick_html = '<div class="ruler-tick-container">'
+        for val in range(6, 13):
+            is_active = (val == st.session_state.insta_scene_count)
+            dot_cls = "ruler-dot active" if is_active else "ruler-dot"
+            num_cls = "ruler-number active" if is_active else "ruler-number"
+            tick_html += f'''
+            <div class="ruler-tick-item">
+                <div class="{dot_cls}"></div>
+                <div class="{num_cls}">{val}</div>
+            </div>
+            '''
+        tick_html += '</div>'
+        st.markdown(tick_html, unsafe_allow_html=True)
     else:
-        st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        
+        # 8~20 줄자 눈금 마커 바 생성
+        tick_html = '<div class="ruler-tick-container">'
+        for val in range(8, 21):
+            is_active = (val == st.session_state.blog_photo_count)
+            dot_cls = "ruler-dot active" if is_active else "ruler-dot"
+            num_cls = "ruler-number active" if is_active else "ruler-number"
+            tick_html += f'''
+            <div class="ruler-tick-item">
+                <div class="{dot_cls}"></div>
+                <div class="{num_cls}">{val}</div>
+            </div>
+            '''
+        tick_html += '</div>'
+        st.markdown(tick_html, unsafe_allow_html=True)
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
