@@ -49,40 +49,58 @@ st.html(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 탭: INSTAGRAM */
+    /* 2. 상단 탭: INSTAGRAM (비활성 시 20% 밝은 차콜그레이) */
     .st-key-tab_insta button {{
-        background: {insta_gradient if is_insta else '#2a2d32'} !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #444850'} !important;
+        background: {insta_gradient if is_insta else '#484c54'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
-        color: {'#ffffff' if is_insta else '#e0e0e0'} !important;
+        color: {'#ffffff' if is_insta else '#f0f0f0'} !important;
         font-size: 17px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 2. 상단 탭: BLOG */
+    /* 2. 상단 탭: BLOG (비활성 시 20% 밝은 차콜그레이) */
     .st-key-tab_blog button {{
-        background: {naver_green if not is_insta else '#2a2d32'} !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #444850'} !important;
+        background: {naver_green if not is_insta else '#484c54'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
-        color: {'#ffffff' if not is_insta else '#e0e0e0'} !important;
+        color: {'#ffffff' if not is_insta else '#f0f0f0'} !important;
         font-size: 17px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 정원형(98px) + 단 1개의 하트 완벽 중앙 렌더링 */
+    /* 3. 하단 중앙 버튼 Flexbox 정중앙 강제 정렬 */
+    .heart-btn-wrapper {{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 10px 0 20px 0 !important;
+    }}
+
+    .heart-btn-wrapper .st-key-btn_generate_main {{
+        width: 98px !important;
+        height: 98px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }}
+
     .st-key-btn_generate_main button {{
         width: 98px !important;
         height: 98px !important;
+        min-width: 98px !important;
+        max-width: 98px !important;
         border-radius: 50% !important;
         background: #FFFFFF !important;
         border: {'5px solid transparent' if is_insta else f'5px solid {naver_green}'} !important;
@@ -92,21 +110,21 @@ st.html(f"""
             if is_insta else "0 0 18px rgba(3, 199, 90, 0.5)"
         } !important;
         transition: all 0.25s ease-in-out !important;
-        margin: 0 auto !important;
         position: relative !important;
         padding: 0 !important;
+        margin: 0 !important;
         overflow: hidden !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }}
 
-    /* 버튼 내부 텍스트 완전 숨김 */
+    /* 버튼 텍스트 숨김 */
     .st-key-btn_generate_main button * {{
         display: none !important;
     }}
 
-    /* 최상위 button 가상요소로 딱 1개의 SVG 하트 정중앙 배치 */
+    /* 단 1개의 SVG 하트 정중앙 배치 */
     .st-key-btn_generate_main button::after {{
         content: "" !important;
         display: block !important;
@@ -297,13 +315,12 @@ with tab_col2:
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 단일 하트 아이콘 원형 생성 버튼: 상하 수직축 정렬] ====================
-b_pad_left, b_center, b_pad_right = st.columns([0.45, 0.1, 0.45])
-
-with b_center:
-    generate_action = st.button("EXECUTE", use_container_width=True, key="btn_generate_main")
+# ==================== [완벽 수직축 정중앙 정렬 단일 하트 버튼] ====================
+st.markdown('<div class="heart-btn-wrapper">', unsafe_allow_html=True)
+generate_action = st.button("EXECUTE", key="btn_generate_main")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
