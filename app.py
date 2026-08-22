@@ -49,7 +49,7 @@ st.html(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 탭: 인스타그램 */
+    /* 2. 상단 탭: INSTAGRAM */
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #333333'} !important;
@@ -61,9 +61,10 @@ st.html(f"""
         color: {'#ffffff' if is_insta else '#aaaaaa'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
+        letter-spacing: 1px !important;
     }}
 
-    /* 2. 상단 탭: 블로그 */
+    /* 2. 상단 탭: BLOG */
     .st-key-tab_blog button {{
         background: {naver_green if not is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #333333'} !important;
@@ -75,12 +76,13 @@ st.html(f"""
         color: {'#ffffff' if not is_insta else '#aaaaaa'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
+        letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 정원형(Circle), 화이트 배경, 5pt(약 7px) 외곽 브랜드 컬러 라인 */
+    /* 3. 하단 중앙 생성 버튼: 정원형(Circle) + 하트 아이콘 */
     .st-key-btn_generate_main button {{
-        width: 170px !important;
-        height: 170px !important;
+        width: 140px !important;
+        height: 140px !important;
         border-radius: 50% !important;
         background: #FFFFFF !important;
         border: {'7px solid transparent' if is_insta else f'7px solid {naver_green}'} !important;
@@ -94,25 +96,20 @@ st.html(f"""
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 10px !important;
+        padding: 0 !important;
     }}
 
     .st-key-btn_generate_main button * {{
-        color: #111111 !important;
-        font-size: 16px !important;
-        font-weight: 900 !important;
-        text-align: center !important;
-        line-height: 1.35 !important;
-        white-space: pre-wrap !important;
-    }}
-
-    /* 작은 원 가상요소 제거 */
-    .st-key-btn_generate_main button::before {{
-        display: none !important;
+        color: {'#dc2743' if is_insta else '#03C75A'} !important;
+        font-size: 42px !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }}
 
     .st-key-btn_generate_main button:hover {{
-        transform: scale(1.05) !important;
+        transform: scale(1.08) !important;
         box-shadow: {
             "0 0 30px rgba(220, 39, 67, 0.8)" 
             if is_insta else "0 0 30px rgba(3, 199, 90, 0.8)"
@@ -256,27 +253,27 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [상단 채널 선택 탭 2개] ====================
+# ==================== [상단 채널 선택 탭 2개: INSTAGRAM / BLOG] ====================
 tab_col1, tab_col2 = st.columns(2)
 
 with tab_col1:
-    if st.button("인스타그램", use_container_width=True, key="tab_insta"):
+    if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
         st.session_state.content_mode = "instagram"
         st.rerun()
 
 with tab_col2:
-    if st.button("블로그", use_container_width=True, key="tab_blog"):
+    if st.button("BLOG", use_container_width=True, key="tab_blog"):
         st.session_state.content_mode = "blog"
         st.rerun()
 
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 5pt 외곽선 정원형 생성 버튼] ====================
-b_col1, b_col2, b_col3 = st.columns([1.5, 1.0, 1.5])
+# ==================== [중앙 정렬 하트 아이콘 원형 생성 버튼] ====================
+b_col1, b_col2, b_col3 = st.columns([1.6, 0.8, 1.6])
 
 with b_col2:
-    btn_label = "인스타그램\n대본 생성하기" if is_insta else "블로그\n원고 생성하기"
-    generate_action = st.button(btn_label, use_container_width=True, key="btn_generate_main")
+    # 텍스트 없이 하트 아이콘만 표시
+    generate_action = st.button("❤️", use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
