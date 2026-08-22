@@ -209,7 +209,27 @@ st.markdown(f"""
         box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
 
-    /* 5. 결과창 대형 복사 버튼 스타일 */
+    /* 5. 사이드바 소제목 앞 미니 포인트 원 (Bullet Dot) */
+    section[data-testid="stSidebar"] label p {{
+        display: flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        color: #e3e3e3 !important;
+    }}
+    section[data-testid="stSidebar"] label p::before {{
+        content: "" !important;
+        display: inline-block !important;
+        width: 8px !important;
+        height: 8px !important;
+        min-width: 8px !important;
+        border-radius: 50% !important;
+        background: {current_theme_color} !important;
+        box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
+    }}
+
+    /* 6. 결과창 대형 복사 버튼 스타일 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -318,21 +338,21 @@ def fetch_url_content(url):
 with st.sidebar:
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
     uploaded_images = st.file_uploader(
-        "📷 가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
+        "가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
         type=["png", "jpg", "jpeg", "webp"], 
         accept_multiple_files=True,
         help="체험단 앱(오늘룩, 레뷰 등) 웹뷰는 보안상 링크 대신 화면을 캡처해서 올려주시면 100% 정확하게 인식합니다."
     )
     guideline_url = st.text_input(
-        "🔗 가이드라인 링크 URL (노션, 웹페이지 등)",
+        "가이드라인 링크 URL (노션, 웹페이지 등)",
         placeholder="https://notion.so/..."
     )
     product_url = st.text_input(
-        "🛍️ 제품 상세페이지 링크 URL (올리브영/스마트스토어 등)",
+        "제품 상세페이지 링크 URL (올리브영/스마트스토어 등)",
         placeholder="https://oliveyoung.co.kr/..."
     )
     guideline_text = st.text_area(
-        "📝 추가 메모 / 가이드 텍스트 (선택)",
+        "추가 메모 / 가이드 텍스트 (선택)",
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
@@ -399,10 +419,10 @@ with st.sidebar:
                     st.session_state.account_tags = data.get("account_tags", "")
                     st.session_state.event_info = data.get("event_info", "")
                     
-                    st.success("✅ 분석 완료! 아래 추출된 내용을 확인하고 필요시 수정해주세요.")
+                    st.success("분석 완료! 아래 추출된 내용을 확인하고 필요시 수정해주세요.")
                     
                     if (g_crawl_fail or p_crawl_fail) and not uploaded_images:
-                        st.info("💡 팁: 앱 전용 웹뷰(오늘룩)나 일부 쇼핑몰은 웹 보안상 링크 직접 읽기가 제한됩니다. 가이드 화면을 캡처해서 상단 '📷 이미지 첨부'에 올리시면 100% 완벽하게 인식됩니다.")
+                        st.info("팁: 앱 전용 웹뷰(오늘룩)나 일부 쇼핑몰은 웹 보안상 링크 직접 읽기가 제한됩니다. 가이드 화면을 캡처해서 상단 파일 첨부에 올리시면 완벽하게 인식됩니다.")
                 except Exception as e:
                     st.error(f"분석 중 오류가 발생했습니다: {e}")
 
@@ -411,7 +431,7 @@ with st.sidebar:
     
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
-    event_info = st.text_area("행사/가격/기획전 정보 (일정, 할인내용)", value=st.session_state.event_info, height=70)
+    event_info = st.text_area("행사 / 가격 / 기획전 정보 (일정, 할인내용)", value=st.session_state.event_info, height=70)
     target_audience = st.text_input("타겟층", value=st.session_state.target_audience)
     essential_tags = st.text_input("필수 해시태그", value=st.session_state.essential_tags)
     account_tags = st.text_input("공식 계정 태그", value=st.session_state.account_tags)
