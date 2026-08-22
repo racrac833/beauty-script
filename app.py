@@ -52,24 +52,38 @@ st.markdown(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 1열 수평 정렬 컨테이너 내부 수직/수평 정렬 */
+    /* 2. 상단 3단 네비게이션 가로 1열 완벽 대칭 레이아웃 */
     div[data-testid="stHorizontalBlock"] {{
+        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        gap: 16px !important;
+        width: 100% !important;
+        max-width: 680px !important;
+        margin: 0 auto !important;
+    }}
+
+    div[data-testid="stHorizontalBlock"] > div {{
+        flex: 1 1 0px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-width: 0 !important;
+    }}
+
+    div[data-testid="stHorizontalBlock"] > div:nth-child(2) {{
+        flex: 0 0 90px !important;
     }}
 
     /* 좌측 탭: INSTAGRAM */
     .st-key-tab_insta {{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
         width: 100% !important;
     }}
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
-        height: 50px !important;
+        height: 48px !important;
         width: 100% !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
@@ -82,16 +96,13 @@ st.markdown(f"""
 
     /* 우측 탭: BLOG */
     .st-key-tab_blog {{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
         width: 100% !important;
     }}
-    .st-key-blog button, .st-key-tab_blog button {{
+    .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
-        height: 50px !important;
+        height: 48px !important;
         width: 100% !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
@@ -102,19 +113,20 @@ st.markdown(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 중앙 하트 생성 버튼 (84px 원형 대칭 고정) */
+    /* 중앙 하트 생성 버튼 (80px 정원형) */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        width: 100% !important;
+        width: 80px !important;
+        height: 80px !important;
         margin: 0 auto !important;
     }}
     .st-key-btn_generate_main button {{
-        width: 84px !important;
-        height: 84px !important;
-        min-width: 84px !important;
-        max-width: 84px !important;
+        width: 80px !important;
+        height: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
         border-radius: 50% !important;
         background: #FFFFFF !important;
         border: {'5px solid transparent' if is_insta else f'5px solid {naver_green}'} !important;
@@ -126,7 +138,7 @@ st.markdown(f"""
         transition: all 0.25s ease-in-out !important;
         position: relative !important;
         padding: 0 !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         overflow: hidden !important;
         display: flex !important;
         align-items: center !important;
@@ -142,8 +154,8 @@ st.markdown(f"""
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 38px !important;
-        height: 38px !important;
+        width: 36px !important;
+        height: 36px !important;
         background: {insta_gradient if is_insta else naver_green} !important;
         -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
         mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
@@ -156,7 +168,7 @@ st.markdown(f"""
         } !important;
     }}
 
-    /* 4. 사이드바 동적 테마 분석 버튼 */
+    /* 3. 사이드바 동적 테마 분석 버튼 */
     .st-key-btn_analyze button {{
         background: {current_theme_color} !important;
         border: none !important;
@@ -175,7 +187,7 @@ st.markdown(f"""
         box-shadow: {'0 6px 20px rgba(220, 39, 67, 0.6)' if is_insta else '0 6px 20px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 5. 사이드바 동적 테마 넘버링 뱃지 헤더 */
+    /* 4. 사이드바 동적 테마 넘버링 뱃지 헤더 */
     .sidebar-section-title {{
         display: flex;
         align-items: center;
@@ -262,8 +274,8 @@ with st.sidebar:
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
-    # 테마 동적 연동 분석 버튼
-    analyze_btn = st.button("⬇️ 자료 종합 분석 & 아래 입력창 채우기", use_container_width=True, key="btn_analyze")
+    # 화살표 제거된 깔끔한 텍스트 분석 버튼
+    analyze_btn = st.button("자료 종합 분석 & 입력창 채우기", use_container_width=True, key="btn_analyze")
     
     if analyze_btn:
         if not uploaded_images and not guideline_url.strip() and not product_url.strip() and not guideline_text.strip():
@@ -355,8 +367,8 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [대칭 1열 정렬: [0.18, 0.28, 0.08, 0.28, 0.18]] ====================
-pad_l, col_insta, col_heart, col_blog, pad_r = st.columns([0.18, 0.28, 0.08, 0.28, 0.18])
+# ==================== [가로 1열 3버튼 완벽 대칭 정렬] ====================
+col_insta, col_heart, col_blog = st.columns(3)
 
 with col_insta:
     if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
