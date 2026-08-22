@@ -479,19 +479,15 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
-    # 공통: 제품 카테고리
+    # 공통: 제품 카테고리 (key 직접 연결로 튕김 현상 제거)
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
-    cat_index = categories.index(st.session_state.product_category) if st.session_state.product_category in categories else 0
-    product_category = st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, index=cat_index)
-    st.session_state.product_category = product_category
+    st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 모드별 분량 슬라이더
+    # 모드별 분량 슬라이더 (key 직접 연결로 단 한 번에 부드럽게 이동)
     if is_insta:
-        insta_scene_count = st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, value=st.session_state.insta_scene_count, step=1)
-        st.session_state.insta_scene_count = insta_scene_count
+        st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
-        blog_photo_count = st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, value=st.session_state.blog_photo_count, step=1)
-        st.session_state.blog_photo_count = blog_photo_count
+        st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -543,13 +539,14 @@ if generate_action:
 
         if is_insta:
             target_scenes = st.session_state.insta_scene_count
-            with st.spinner(f"[{product_category}] 맞춤 장면 {target_scenes}개 구성의 릴스 콘티를 작성 중입니다..."):
+            current_cat = st.session_state.product_category
+            with st.spinner(f"[{current_cat}] 맞춤 장면 {target_scenes}개 구성의 릴스 콘티를 작성 중입니다..."):
                 system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 전문 최고급 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
-사용자가 제공하는 [카테고리: {product_category}, 장면 수: {target_scenes}개, 가이드라인, 제품 상세페이지 내용, 제품 USP, 행사 정보]를 분석하여 최적화된 릴스 촬영 콘티를 작성합니다.
+사용자가 제공하는 [카테고리: {current_cat}, 장면 수: {target_scenes}개, 가이드라인, 제품 상세페이지 내용, 제품 USP, 행사 정보]를 분석하여 최적화된 릴스 촬영 콘티를 작성합니다.
 
-[카테고리별 숏폼 연출 특화 지침 - 현재 카테고리: {product_category}]
+[카테고리별 숏폼 연출 특화 지침 - 현재 카테고리: {current_cat}]
 - 기초/스킨케어: 텍스처 수분 광채 클로즈업, 부위별 롤링/흡수 모션, 결 정돈 비포애프터
 - 색조/메이크업: 본통 컬러 팁 컷, 자연광 피부/입술 발색 모션, 밀착력 및 묻어남 방지 테스트
 - 선케어/클렌징: 백탁 없는 투명 밀착 발림, 메이크업 세정 롤링 액션, 산뜻한 마무리감
@@ -589,7 +586,7 @@ if generate_action:
 [출력 양식 템플릿]
 
 썸네일
-썸네일(비주얼 연출 컷 설명) : ({product_category} 특성을 살린 후킹 비주얼 /
+썸네일(비주얼 연출 컷 설명) : ({current_cat} 특성을 살린 후킹 비주얼 /
 20~30자 단위 줄바꿈)
 
 [베스트 썸네일]
@@ -664,8 +661,8 @@ if generate_action:
 각 문장별 20~30자 내외 줄바꿈하여 출력)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [카테고리: {product_category}], [정확히 {target_scenes}개 장면 구성], [자막 서술형 금지 / 명사형 요약], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
-- 카테고리: {product_category}
+다음 정보를 바탕으로 위 템플릿과 [카테고리: {current_cat}], [정확히 {target_scenes}개 장면 구성], [자막 서술형 금지 / 명사형 요약], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
+- 카테고리: {current_cat}
 - 장면 수: {target_scenes}개 씬
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
@@ -693,13 +690,14 @@ if generate_action:
 
         else:
             target_photos = st.session_state.blog_photo_count
-            with st.spinner(f"[{product_category}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
+            current_cat = st.session_state.product_category
+            with st.spinner(f"[{current_cat}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
                 system_instruction_blog = f"""
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
-사용자가 제공한 [카테고리: {product_category}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
+사용자가 제공한 [카테고리: {current_cat}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
 
-[카테고리별 전문 톤앤매너 지침 - 현재 카테고리: {product_category}]
+[카테고리별 전문 톤앤매너 지침 - 현재 카테고리: {current_cat}]
 - 기초/스킨케어: 수분감, 속건조, 피부결 정돈, 유수분 밸런스, 쿨링감 중심
 - 색조/메이크업: 자연광 발색, 홋수/톤체크, 밀착력, 묻어남/지속력 테스트 중심
 - 선케어/클렌징: 백탁/눈시림 여부, 세정력 테스트, 잔여감 없는 산뜻함 중심
@@ -715,7 +713,7 @@ if generate_action:
 
 2. [사진 장수 정확히 {target_photos}장 구성 (STRICT)]:
 - 반드시 [사진 1]부터 [사진 {target_photos}]까지 정확히 {target_photos}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
-- 각 사진마다 '{product_category}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
+- 각 사진마다 '{current_cat}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
 
 3. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
 - [브랜드명 + 핵심 키워드 + 제품군]을 앞단(15자 이내)에 배치한 제목 5선을 추천합니다.
@@ -745,7 +743,7 @@ if generate_action:
 [사진 1] 부터 [사진 {target_photos}] 까지 순서대로:
 
 [사진 번호]
-(촬영 가이드: {product_category} 특성에 맞춘 촬영 가이드 /
+(촬영 가이드: {current_cat} 특성에 맞춘 촬영 가이드 /
 한 줄로 길어지지 않게 20~30자마다
 자연스럽게 엔터로 줄바꿈)
 
@@ -759,8 +757,8 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {product_category}], [사진 장수: 정확히 {target_photos}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
-- 카테고리: {product_category}
+다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {current_cat}], [사진 장수: 정확히 {target_photos}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
+- 카테고리: {current_cat}
 - 사진 장수: {target_photos}장
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
