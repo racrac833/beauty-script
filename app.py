@@ -28,8 +28,10 @@ if "event_info" not in st.session_state:
     st.session_state.event_info = ""
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
-if "generated_result" not in st.session_state:
-    st.session_state.generated_result = ""
+if "insta_result" not in st.session_state:
+    st.session_state.insta_result = ""
+if "blog_result" not in st.session_state:
+    st.session_state.blog_result = ""
 
 is_insta = (st.session_state.content_mode == "instagram")
 
@@ -207,7 +209,7 @@ st.markdown(f"""
         box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
 
-    /* 5. 결과창 복사 버튼 강조 스타일 */
+    /* 5. 결과창 대형 복사 버튼 강조 스타일 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -220,21 +222,29 @@ st.markdown(f"""
         background: {current_theme_color} !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 8px !important;
-        padding: 6px 12px !important;
+        border-radius: 10px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         opacity: 0.95 !important;
-        box-shadow: {'0 3px 12px rgba(220, 39, 67, 0.6)' if is_insta else '0 3px 12px rgba(3, 199, 90, 0.6)'} !important;
+        box-shadow: {'0 4px 14px rgba(220, 39, 67, 0.7)' if is_insta else '0 4px 14px rgba(3, 199, 90, 0.7)'} !important;
         transition: all 0.2s ease-in-out !important;
+        top: 12px !important;
+        right: 12px !important;
     }}
     .stCodeBlock button:hover {{
-        transform: scale(1.1) !important;
+        transform: scale(1.15) !important;
         opacity: 1 !important;
-        box-shadow: {'0 4px 18px rgba(220, 39, 67, 0.9)' if is_insta else '0 4px 18px rgba(3, 199, 90, 0.9)'} !important;
+        box-shadow: {'0 6px 20px rgba(220, 39, 67, 0.9)' if is_insta else '0 6px 20px rgba(3, 199, 90, 0.9)'} !important;
     }}
     .stCodeBlock button svg {{
         fill: #ffffff !important;
-        width: 18px !important;
-        height: 18px !important;
+        width: 24px !important;
+        height: 24px !important;
     }}
     .result-clean-header {{
         font-size: 22px;
@@ -243,6 +253,17 @@ st.markdown(f"""
         margin-top: 15px;
         margin-bottom: 12px;
         letter-spacing: 0.5px;
+    }}
+    .empty-result-box {{
+        background: #1e2025;
+        border: 1px dashed #444850;
+        border-radius: 14px;
+        padding: 40px 20px;
+        text-align: center;
+        color: #9aa0a6;
+        font-size: 15px;
+        font-weight: 600;
+        margin-top: 10px;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -438,27 +459,32 @@ if generate_action:
 
 [핵심 절대 원칙 (CRITICAL)]
 
-1. [썸네일 필수 구성 (베스트 1종 + 추천 5선)]:
+1. [종결 어미 스타일 엄수 (CRITICAL)]:
+- '~했다', '~해봤다', '~붙여봤다' 등 딱딱하게 끝나는 종결형 어미를 절대 쓰지 마세요.
+- 부드러운 연결형이나 솔직한 구어체로 표현하세요.
+  (예: 한쪽에만 붙여봤다 ➔ 한쪽에만 붙여보고 / 발라보았다 ➔ 슥 발라봤는데 / 사용했다 ➔ 직접 써보니까 / 놀라웠다 ➔ 감탄 나오더라고요)
+
+2. [썸네일 필수 구성 (베스트 1종 + 추천 5선)]:
 - 최상단에 썸네일 비주얼 연출 컷 설명, [베스트 썸네일], 그리고 [추천 썸네일 문구 5선](1~5번)을 반드시 별도로 전부 작성합니다.
 - 모든 썸네일은 2줄 형태이며, 첫째 줄은 공백 제외 10자 이내, 둘째 줄은 공백 제외 12자 이내를 엄수합니다.
 
-2. [자막 분절 요약 원칙]:
+3. [자막 분절 요약 원칙]:
 - 각 장면의 나레이션 문장을 크게 전반부와 후반부 2개의 핵심 의미로 나눈 뒤, 자막은 반드시 아래와 같이 [앞쪽 나레이션 요약 / 뒤쪽 나레이션 요약] 구조로 작성합니다.
 - 자막 줄바꿈 시 슬래시(/)는 반드시 단독 줄로 배치합니다.
 
-3. [줄바꿈 및 서식 규칙 엄수 (STRICT)]:
+4. [줄바꿈 및 서식 규칙 엄수 (STRICT)]:
 - 아래 [출력 양식 템플릿]의 줄바꿈, 빈 줄, 문장 구조, 띄어쓰기를 100% 동일하게 유지하여 출력합니다.
 - 장면 사이에는 반드시 빈 줄을 둡니다.
 - '자막：', '나레이션：' 콜론 표기 뒤 줄바꿈 규칙을 엄수합니다.
 
-4. [7~8개 핵심 씬 구성 및 30초 이상 나레이션]:
+5. [7~8개 핵심 씬 구성 및 30초 이상 나레이션]:
 - 장면 갯수는 [1. 장면]부터 [7. 장면] 또는 [8. 장면]까지 핵심 7~8개 씬으로 구성합니다.
 - 전체 나레이션 분량은 빠른 구어체 30초 이상(공백 포함 450~550자 내외)으로 풍성하게 작성합니다.
 
-5. [서술어 중복 절대 금지]:
+6. [서술어 중복 절대 금지]:
 - 한 대본 내에서 동일한 서술어나 종결 어미가 2회 이상 반복되지 않도록 다양화합니다 (~정착했잖아요, ~감탄 나오더라고요, ~싹 잡히는 기분이에요, ~유용한 것 같아요 등).
 
-6. [브랜드명 및 필수 요소 원형 유지]:
+7. [브랜드명 및 필수 요소 원형 유지]:
 - 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
 - 필수 해시태그('{essential_tags}') 및 행사 정보('{event_info}')를 완벽히 반영합니다.
 
@@ -620,7 +646,7 @@ if generate_action:
 (1번부터 마지막 씬까지의 전체 나레이션 전문을 모아서 각 문장별 줄바꿈하여 출력 / 공백 포함 450~550자 내외)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [베스트 썸네일 + 추천 5선], 줄바꿈/서식 규칙을 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿과 [베스트 썸네일 + 추천 5선], 줄바꿈/서식 규칙, 부드러운 구어체 어미(~했다 금지)를 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -641,7 +667,7 @@ if generate_action:
                             temperature=0.4,
                         )
                     )
-                    st.session_state.generated_result = response.text
+                    st.session_state.insta_result = response.text
                 except Exception as e:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
@@ -651,6 +677,11 @@ if generate_action:
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
 사용자가 제공한 [가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
+
+[핵심 절대 원칙 (CRITICAL)]
+1. [종결 어미 스타일 엄수]:
+- '~했다', '~해봤다' 등 딱딱한 어미 대신 친근하고 부드러운 30대 여성 찐후기 어조(~해보고, ~발라봤는데, ~직접 써보니까 등)를 유지하세요.
+2. [브랜드명 및 고유명칭 원형 유지]: 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
 
 [출력 양식 템플릿 - 아래 형식을 엄격히 지켜 출력할 것]
 
@@ -710,7 +741,7 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙을 100% 지켜 네이버 블로그 원고를 작성해줘:
+다음 정보를 바탕으로 위 블로그 템플릿 규칙과 부드러운 구어체 어미(~했다 금지)를 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -734,14 +765,21 @@ if generate_action:
                             temperature=0.4,
                         )
                     )
-                    st.session_state.generated_result = response.text
+                    st.session_state.blog_result = response.text
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [결과 화면: 깔끔한 텍스트 헤더 + 눈에 띄는 복사 버튼] ====================
-if st.session_state.generated_result:
-    label_type = "인스타그램 대본" if is_insta else "블로그 원고"
-    
-    st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
-    # Streamlit 내장 코드 블록 (우측 상단 복사 버튼 테마 컬러 및 호버 효과 적용)
-    st.code(st.session_state.generated_result, language="markdown")
+# ==================== [결과 화면: 독립 분리 및 대형 복사 아이콘 지원] ====================
+current_result = st.session_state.insta_result if is_insta else st.session_state.blog_result
+label_type = "인스타그램 대본" if is_insta else "블로그 원고"
+
+st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
+
+if current_result:
+    # Streamlit 내장 코드 블록 (우측 상단 대형 복사 버튼)
+    st.code(current_result, language="markdown")
+else:
+    st.markdown(
+        f'<div class="empty-result-box">아직 생성된 {label_type}가 없습니다.<br>상단 중앙의 <b>하트(❤️) 버튼</b>을 누르면 생성이 시작됩니다.</div>', 
+        unsafe_allow_html=True
+    )
