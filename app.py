@@ -51,70 +51,72 @@ st.html(f"""
 
     /* 2. 상단 탭: 인스타그램 */
     .st-key-tab_insta button {{
-        background: {insta_gradient if is_insta else '#999999'} !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #777777'} !important;
+        background: {insta_gradient if is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #333333'} !important;
         border-radius: 30px !important;
         height: 52px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
-        color: {'#ffffff' if is_insta else '#111111'} !important;
+        color: {'#ffffff' if is_insta else '#aaaaaa'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
     }}
 
     /* 2. 상단 탭: 블로그 */
     .st-key-tab_blog button {{
-        background: {naver_green if not is_insta else '#999999'} !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #777777'} !important;
+        background: {naver_green if not is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #333333'} !important;
         border-radius: 30px !important;
         height: 52px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
-        color: {'#ffffff' if not is_insta else '#111111'} !important;
+        color: {'#ffffff' if not is_insta else '#aaaaaa'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
     }}
 
-    /* 3. 하단 중앙 슬림 생성 버튼 (화이트 바탕, 블랙 텍스트, 단일 원) */
+    /* 3. 하단 중앙 생성 버튼: 정원형(Circle), 화이트 배경, 5pt(약 7px) 외곽 브랜드 컬러 라인 */
     .st-key-btn_generate_main button {{
+        width: 170px !important;
+        height: 170px !important;
+        border-radius: 50% !important;
         background: #FFFFFF !important;
-        border: 1px solid #E0E0E0 !important;
-        border-radius: 50px !important;
-        height: 52px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
-        transition: all 0.2s ease-in-out !important;
+        border: {'7px solid transparent' if is_insta else f'7px solid {naver_green}'} !important;
+        {'background-image: linear-gradient(#FFFFFF, #FFFFFF), ' + insta_gradient + ' !important; background-origin: border-box !important; background-clip: padding-box, border-box !important;' if is_insta else ''}
+        box-shadow: {
+            "0 0 20px rgba(220, 39, 67, 0.5)" 
+            if is_insta else "0 0 20px rgba(3, 199, 90, 0.5)"
+        } !important;
+        transition: all 0.25s ease-in-out !important;
+        margin: 0 auto !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        padding: 10px !important;
     }}
-    
+
     .st-key-btn_generate_main button * {{
         color: #111111 !important;
         font-size: 16px !important;
-        font-weight: 800 !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+        line-height: 1.35 !important;
+        white-space: pre-wrap !important;
     }}
-    
-    /* 최상위 button 요소에만 단 1개의 가상 원 생성 */
+
+    /* 작은 원 가상요소 제거 */
     .st-key-btn_generate_main button::before {{
-        content: "" !important;
-        display: inline-block !important;
-        width: 12px !important;
-        height: 12px !important;
-        border-radius: 50% !important;
-        background: {insta_gradient if is_insta else naver_green} !important;
-        margin-right: 10px !important;
-        box-shadow: {
-            "0 0 6px rgba(220, 39, 67, 0.6)" 
-            if is_insta else "0 0 6px rgba(3, 199, 90, 0.6)"
-        } !important;
+        display: none !important;
     }}
 
     .st-key-btn_generate_main button:hover {{
-        background: #F8F9FA !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+        transform: scale(1.05) !important;
+        box-shadow: {
+            "0 0 30px rgba(220, 39, 67, 0.8)" 
+            if is_insta else "0 0 30px rgba(3, 199, 90, 0.8)"
+        } !important;
     }}
 </style>
 """)
@@ -267,13 +269,13 @@ with tab_col2:
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 슬림 원형 생성 버튼] ====================
-b_col1, b_col2, b_col3 = st.columns([1.8, 2.0, 1.8])
+# ==================== [중앙 정렬 5pt 외곽선 정원형 생성 버튼] ====================
+b_col1, b_col2, b_col3 = st.columns([1.5, 1.0, 1.5])
 
 with b_col2:
-    btn_label = "인스타그램 대본 생성하기" if is_insta else "블로그 원고 생성하기"
+    btn_label = "인스타그램\n대본 생성하기" if is_insta else "블로그\n원고 생성하기"
     generate_action = st.button(btn_label, use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
