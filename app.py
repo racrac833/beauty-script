@@ -54,12 +54,12 @@ st.html(f"""
         background: {insta_gradient if is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #333333'} !important;
         border-radius: 30px !important;
-        height: 52px !important;
+        height: 50px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
         color: {'#ffffff' if is_insta else '#aaaaaa'} !important;
-        font-size: 18px !important;
+        font-size: 17px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
@@ -69,12 +69,12 @@ st.html(f"""
         background: {naver_green if not is_insta else 'rgba(0, 0, 0, 0.8)'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #333333'} !important;
         border-radius: 30px !important;
-        height: 52px !important;
+        height: 50px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
         color: {'#ffffff' if not is_insta else '#aaaaaa'} !important;
-        font-size: 18px !important;
+        font-size: 17px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
@@ -253,8 +253,9 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [상단 채널 선택 탭 2개: INSTAGRAM / BLOG] ====================
-tab_col1, tab_col2 = st.columns(2)
+# ==================== [상단 채널 선택 탭 2개: 좌우 60% 슬림 중앙 정렬] ====================
+# [20%, 30%, 30%, 20%] 구조로 중앙 60% 영역에 배치
+pad_left, tab_col1, tab_col2, pad_right = st.columns([0.2, 0.3, 0.3, 0.2])
 
 with tab_col1:
     if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
@@ -272,7 +273,6 @@ st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 b_col1, b_col2, b_col3 = st.columns([1.6, 0.8, 1.6])
 
 with b_col2:
-    # 텍스트 없이 하트 아이콘만 표시
     generate_action = st.button("❤️", use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
