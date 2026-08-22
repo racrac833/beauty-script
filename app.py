@@ -51,35 +51,35 @@ st.html(f"""
 
     /* 2. 상단 탭: INSTAGRAM */
     .st-key-tab_insta button {{
-        background: {insta_gradient if is_insta else '#CCCCCC'} !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #999999'} !important;
+        background: {insta_gradient if is_insta else '#2a2d32'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #444850'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
-        color: {'#ffffff' if is_insta else '#111111'} !important;
+        color: {'#ffffff' if is_insta else '#e0e0e0'} !important;
         font-size: 17px !important;
-        font-weight: 900 !important;
+        font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
     /* 2. 상단 탭: BLOG */
     .st-key-tab_blog button {{
-        background: {naver_green if not is_insta else '#CCCCCC'} !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #999999'} !important;
+        background: {naver_green if not is_insta else '#2a2d32'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #444850'} !important;
         border-radius: 30px !important;
         height: 50px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
-        color: {'#ffffff' if not is_insta else '#111111'} !important;
+        color: {'#ffffff' if not is_insta else '#e0e0e0'} !important;
         font-size: 17px !important;
-        font-weight: 900 !important;
+        font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 정원형(98px) + 단 1개의 하트 정중앙 렌더링 */
+    /* 3. 하단 중앙 생성 버튼: 정원형(98px) + 단 1개의 하트 완벽 중앙 렌더링 */
     .st-key-btn_generate_main button {{
         width: 98px !important;
         height: 98px !important;
@@ -88,14 +88,17 @@ st.html(f"""
         border: {'5px solid transparent' if is_insta else f'5px solid {naver_green}'} !important;
         {'background-image: linear-gradient(#FFFFFF, #FFFFFF), ' + insta_gradient + ' !important; background-origin: border-box !important; background-clip: padding-box, border-box !important;' if is_insta else ''}
         box-shadow: {
-            "0 0 15px rgba(220, 39, 67, 0.5)" 
-            if is_insta else "0 0 15px rgba(3, 199, 90, 0.5)"
+            "0 0 18px rgba(220, 39, 67, 0.5)" 
+            if is_insta else "0 0 18px rgba(3, 199, 90, 0.5)"
         } !important;
         transition: all 0.25s ease-in-out !important;
         margin: 0 auto !important;
         position: relative !important;
         padding: 0 !important;
         overflow: hidden !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }}
 
     /* 버튼 내부 텍스트 완전 숨김 */
@@ -121,8 +124,8 @@ st.html(f"""
     .st-key-btn_generate_main button:hover {{
         transform: scale(1.08) !important;
         box-shadow: {
-            "0 0 25px rgba(220, 39, 67, 0.8)" 
-            if is_insta else "0 0 25px rgba(3, 199, 90, 0.8)"
+            "0 0 28px rgba(220, 39, 67, 0.8)" 
+            if is_insta else "0 0 28px rgba(3, 199, 90, 0.8)"
         } !important;
     }}
 </style>
@@ -296,10 +299,10 @@ with tab_col2:
 
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 단일 하트 아이콘 원형 생성 버튼] ====================
-b_col1, b_col2, b_col3 = st.columns([1.8, 0.4, 1.8])
+# ==================== [중앙 정렬 단일 하트 아이콘 원형 생성 버튼: 상하 수직축 정렬] ====================
+b_pad_left, b_center, b_pad_right = st.columns([0.45, 0.1, 0.45])
 
-with b_col2:
+with b_center:
     generate_action = st.button("EXECUTE", use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
@@ -505,10 +508,6 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
-                contents = []
-                if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
