@@ -36,7 +36,7 @@ is_insta = (st.session_state.content_mode == "instagram")
 # 스타일 CSS 주입
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
-sky_blue = "#00A3FF"
+current_theme_color = insta_gradient if is_insta else naver_green
 
 st.markdown(f"""
 <style>
@@ -59,11 +59,18 @@ st.markdown(f"""
     }}
 
     /* 좌측 탭: INSTAGRAM */
+    .st-key-tab_insta {{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+    }}
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
+        width: 100% !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
@@ -74,11 +81,18 @@ st.markdown(f"""
     }}
 
     /* 우측 탭: BLOG */
-    .st-key-tab_blog button {{
+    .st-key-tab_blog {{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+    }}
+    .st-key-blog button, .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
+        width: 100% !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
@@ -88,7 +102,7 @@ st.markdown(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 중앙 하트 생성 버튼 (98px 원형 완벽 중앙 고정) */
+    /* 중앙 하트 생성 버튼 (84px 원형 대칭 고정) */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
@@ -97,10 +111,10 @@ st.markdown(f"""
         margin: 0 auto !important;
     }}
     .st-key-btn_generate_main button {{
-        width: 98px !important;
-        height: 98px !important;
-        min-width: 98px !important;
-        max-width: 98px !important;
+        width: 84px !important;
+        height: 84px !important;
+        min-width: 84px !important;
+        max-width: 84px !important;
         border-radius: 50% !important;
         background: #FFFFFF !important;
         border: {'5px solid transparent' if is_insta else f'5px solid {naver_green}'} !important;
@@ -128,8 +142,8 @@ st.markdown(f"""
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        width: 44px !important;
-        height: 44px !important;
+        width: 38px !important;
+        height: 38px !important;
         background: {insta_gradient if is_insta else naver_green} !important;
         -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
         mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
@@ -142,13 +156,13 @@ st.markdown(f"""
         } !important;
     }}
 
-    /* 4. 사이드바 하늘색 분석 버튼 */
+    /* 4. 사이드바 동적 테마 분석 버튼 */
     .st-key-btn_analyze button {{
-        background: {sky_blue} !important;
+        background: {current_theme_color} !important;
         border: none !important;
         border-radius: 12px !important;
         height: 48px !important;
-        box-shadow: 0 4px 15px rgba(0, 163, 255, 0.4) !important;
+        box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.4)' if is_insta else '0 4px 15px rgba(3, 199, 90, 0.4)'} !important;
         transition: all 0.2s ease-in-out !important;
     }}
     .st-key-btn_analyze button * {{
@@ -157,12 +171,11 @@ st.markdown(f"""
         font-weight: 900 !important;
     }}
     .st-key-btn_analyze button:hover {{
-        background: #008be0 !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 6px 20px rgba(0, 163, 255, 0.6) !important;
+        box-shadow: {'0 6px 20px rgba(220, 39, 67, 0.6)' if is_insta else '0 6px 20px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 5. 사이드바 하늘색 넘버링 뱃지 헤더 */
+    /* 5. 사이드바 동적 테마 넘버링 뱃지 헤더 */
     .sidebar-section-title {{
         display: flex;
         align-items: center;
@@ -172,8 +185,8 @@ st.markdown(f"""
         color: #ffffff;
         margin-bottom: 12px;
     }}
-    .sky-badge {{
-        background: {sky_blue};
+    .theme-badge {{
+        background: {current_theme_color};
         color: #ffffff;
         border-radius: 50%;
         width: 26px;
@@ -183,7 +196,7 @@ st.markdown(f"""
         justify-content: center;
         font-size: 14px;
         font-weight: 900;
-        box-shadow: 0 2px 8px rgba(0, 163, 255, 0.5);
+        box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -229,7 +242,7 @@ def fetch_url_content(url):
         return ""
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-section-title"><span class="sky-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-section-title"><span class="theme-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
     uploaded_images = st.file_uploader(
         "📷 가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
         type=["png", "jpg", "jpeg", "webp"], 
@@ -249,7 +262,7 @@ with st.sidebar:
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
-    # 하늘색 + 아래 화살표 분석 버튼
+    # 테마 동적 연동 분석 버튼
     analyze_btn = st.button("⬇️ 자료 종합 분석 & 아래 입력창 채우기", use_container_width=True, key="btn_analyze")
     
     if analyze_btn:
@@ -321,7 +334,7 @@ with st.sidebar:
                     st.error(f"분석 중 오류가 발생했습니다: {e}")
 
     st.markdown("---")
-    st.markdown('<div class="sidebar-section-title"><span class="sky-badge">2</span> 추출 정보 확인 및 수정</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 수정</div>', unsafe_allow_html=True)
     
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -342,8 +355,8 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [대칭 1열 정렬: 여백15% - INSTAGRAM30% - 하트10% - BLOG30% - 여백15%] ====================
-pad_l, col_insta, col_heart, col_blog, pad_r = st.columns([0.15, 0.30, 0.10, 0.30, 0.15])
+# ==================== [대칭 1열 정렬: [0.18, 0.28, 0.08, 0.28, 0.18]] ====================
+pad_l, col_insta, col_heart, col_blog, pad_r = st.columns([0.18, 0.28, 0.08, 0.28, 0.18])
 
 with col_insta:
     if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
