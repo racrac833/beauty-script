@@ -13,7 +13,7 @@ load_dotenv()
 
 st.set_page_config(page_title="RAMILOVE", layout="wide")
 
-# 1. 세션 상태 초기화
+# ==================== [1. 세션 상태 초기화] ====================
 if "brand_name" not in st.session_state:
     st.session_state.brand_name = ""
 if "product_usp" not in st.session_state:
@@ -39,17 +39,38 @@ if "insta_scene_count" not in st.session_state:
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
-# 2. 테마 컬러 정의 (현재 모드 기준 100% 동기화)
+# ==================== [2. 중앙 타이틀 출력] ====================
+st.markdown('<div class="ramilove-header">RAMILOVE</div>', unsafe_allow_html=True)
+
+# ==================== [3. 상단 3단 네비게이션 가로 1열 완벽 대칭 정렬] ====================
+# (모드 전환 버튼을 최상단에서 먼저 감지하여 CSS와 사이드바에 100% 동기화)
+col_insta, col_heart, col_blog = st.columns(3)
+
+with col_insta:
+    if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
+        st.session_state.content_mode = "instagram"
+        st.rerun()
+
+with col_heart:
+    generate_action = st.button("EXECUTE", key="btn_generate_main")
+
+with col_blog:
+    if st.button("BLOG", use_container_width=True, key="tab_blog"):
+        st.session_state.content_mode = "blog"
+        st.rerun()
+
+# ==================== [4. 모드 확정 후 테마 컬러 및 CSS 주입] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 current_theme_color = insta_gradient if is_insta else naver_green
-slider_active_color = "#e6683c" if is_insta else naver_green
+active_color_solid = "#e6683c" if is_insta else "#03C75A"
+active_border_solid = "#ff4b72" if is_insta else "#00ff6f"
 
 st.markdown(f"""
 <style>
-    /* 1. 중앙 타이틀 */
+    /* 1. 중앙 정렬 RAMILOVE 타이틀 */
     .ramilove-header {{
         text-align: center;
         font-size: 38px !important;
@@ -61,7 +82,7 @@ st.markdown(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 3단 네비게이션 가로 1열 완벽 대칭 */
+    /* 2. 상단 3단 네비게이션 가로 1열 완벽 대칭 레이아웃 */
     div[data-testid="stHorizontalBlock"] {{
         display: flex !important;
         align-items: center !important;
@@ -122,7 +143,7 @@ st.markdown(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 중앙 하트 생성 버튼 */
+    /* 중앙 하트 생성 버튼 (80px 정원형) */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
@@ -253,7 +274,7 @@ st.markdown(f"""
     }}
     /* 슬라이더 손잡이(노브) */
     div[data-testid="stSlider"] div[role="slider"] {{
-        background: {slider_active_color} !important;
+        background: {active_color_solid} !important;
         border: 2.5px solid #ffffff !important;
         width: 18px !important;
         height: 18px !important;
@@ -265,7 +286,7 @@ st.markdown(f"""
         display: none !important;
     }}
 
-    /* 7. 줄자형 눈금 점(마커): 슬라이더 바로 밑 밀착 & 100% 가시성 확보 */
+    /* 7. 줄자형 눈금 점(마커): 슬라이더 바로 아래 밀착 & 가시성 100% 확보 */
     .ruler-dot-wrapper {{
         display: flex !important;
         justify-content: space-between !important;
@@ -273,12 +294,11 @@ st.markdown(f"""
         width: calc(100% - 18px) !important;
         margin-left: 9px !important;
         margin-right: 9px !important;
-        margin-top: -6px !important;
+        margin-top: 5px !important;
         margin-bottom: 14px !important;
         box-sizing: border-box !important;
         position: relative !important;
-        z-index: 10 !important;
-        pointer-events: none !important;
+        z-index: 99 !important;
     }}
     .ruler-dot-item {{
         display: flex !important;
@@ -292,10 +312,11 @@ st.markdown(f"""
         height: 5px !important;
         border-radius: 50% !important;
         background-color: #6b7280 !important;
+        display: block !important;
         transition: all 0.15s ease-in-out !important;
     }}
     .ruler-dot.active {{
-        background: {slider_active_color} !important;
+        background: {active_color_solid} !important;
         box-shadow: {'0 0 8px rgba(220, 39, 67, 1)' if is_insta else '0 0 8px rgba(3, 199, 90, 1)'} !important;
         transform: scale(1.6) !important;
     }}
@@ -320,7 +341,7 @@ st.markdown(f"""
         align-items: center;
         gap: 6px;
         background: rgba(255, 255, 255, 0.08);
-        border: 1.5px solid {'#ff4b72' if is_insta else '#00ff6f'};
+        border: 1.5px solid {active_border_solid};
         padding: 4px 12px;
         border-radius: 20px;
         color: #ffffff;
@@ -410,9 +431,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# 중앙 타이틀 출력
-st.markdown('<div class="ramilove-header">RAMILOVE</div>', unsafe_allow_html=True)
-
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
@@ -450,6 +468,7 @@ def fetch_url_content(url):
     except Exception:
         return ""
 
+# ==================== [5. 사이드바 구성] ====================
 with st.sidebar:
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
     uploaded_images = st.file_uploader(
@@ -555,7 +574,7 @@ with st.sidebar:
         for val in range(6, 13):
             is_active = (val == st.session_state.insta_scene_count)
             dot_cls = "ruler-dot active" if is_active else "ruler-dot"
-            dot_items.append(f'<div class="ruler-dot-item"><div class="{dot_cls}"></div></div>')
+            dot_items.append(f'<div class="ruler-dot-item"><span class="{dot_cls}"></span></div>')
         st.markdown(f'<div class="ruler-dot-wrapper">{"".join(dot_items)}</div>', unsafe_allow_html=True)
     else:
         st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
@@ -563,7 +582,7 @@ with st.sidebar:
         for val in range(8, 21):
             is_active = (val == st.session_state.blog_photo_count)
             dot_cls = "ruler-dot active" if is_active else "ruler-dot"
-            dot_items.append(f'<div class="ruler-dot-item"><div class="{dot_cls}"></div></div>')
+            dot_items.append(f'<div class="ruler-dot-item"><span class="{dot_cls}"></span></div>')
         st.markdown(f'<div class="ruler-dot-wrapper">{"".join(dot_items)}</div>', unsafe_allow_html=True)
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
@@ -585,25 +604,9 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [가로 1열 3버튼 완벽 대칭 정렬] ====================
-col_insta, col_heart, col_blog = st.columns(3)
-
-with col_insta:
-    if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
-        st.session_state.content_mode = "instagram"
-        st.rerun()
-
-with col_heart:
-    generate_action = st.button("EXECUTE", key="btn_generate_main")
-
-with col_blog:
-    if st.button("BLOG", use_container_width=True, key="tab_blog"):
-        st.session_state.content_mode = "blog"
-        st.rerun()
-
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [대본 / 원고 생성 로직] ====================
+# ==================== [6. 대본 / 원고 생성 로직] ====================
 if generate_action:
     if not brand_name or not product_usp:
         st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
@@ -864,7 +867,7 @@ if generate_action:
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [결과 화면: 눈에 띄는 설정값 뱃지 UI] ====================
+# ==================== [7. 결과 화면: 눈에 띄는 설정값 뱃지 UI] ====================
 current_result = st.session_state.insta_result if is_insta else st.session_state.blog_result
 main_title = "인스타그램 대본" if is_insta else "블로그 원고"
 config_info = f"{st.session_state.product_category} · 장면 {st.session_state.insta_scene_count}개" if is_insta else f"{st.session_state.product_category} · 사진 {st.session_state.blog_photo_count}장"
