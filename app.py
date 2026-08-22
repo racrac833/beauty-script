@@ -356,7 +356,8 @@ with st.sidebar:
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
-    analyze_btn = st.button("자료 종합 분석 & 입력창 채우기", use_container_width=True, key="btn_analyze")
+    # 텍스트 변경: 추출 정보 채우기
+    analyze_btn = st.button("추출 정보 채우기", use_container_width=True, key="btn_analyze")
     
     if analyze_btn:
         if not uploaded_images and not guideline_url.strip() and not product_url.strip() and not guideline_text.strip():
@@ -689,6 +690,10 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
