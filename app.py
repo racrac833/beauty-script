@@ -79,7 +79,7 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 70% 축소 (98px 정원형), 외곽선 + 하트 아이콘 컬러 동기화 */
+    /* 3. 하단 중앙 생성 버튼: 70% 축소 (98px 정원형) */
     .st-key-btn_generate_main button {{
         width: 98px !important;
         height: 98px !important;
@@ -99,13 +99,23 @@ st.html(f"""
         padding: 0 !important;
     }}
 
-    .st-key-btn_generate_main button * {{
-        font-size: 34px !important;
-        line-height: 1 !important;
+    /* 버튼 기본 글씨 숨김 처리 (순수 SVG 하트만 노출) */
+    .st-key-btn_generate_main button p, .st-key-btn_generate_main button span {{
+        font-size: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        {'background: ' + insta_gradient + ' !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;' if is_insta else f'color: {naver_green} !important;'}
+    }}
+
+    /* SVG 하트 아이콘 강제 주입 */
+    .st-key-btn_generate_main button p::after, .st-key-btn_generate_main button span::after {{
+        content: "" !important;
+        display: block !important;
+        width: 36px !important;
+        height: 36px !important;
+        background: {insta_gradient if is_insta else naver_green} !important;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
     }}
 
     .st-key-btn_generate_main button:hover {{
@@ -290,7 +300,7 @@ st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 b_col1, b_col2, b_col3 = st.columns([1.8, 0.4, 1.8])
 
 with b_col2:
-    generate_action = st.button("❤️", use_container_width=True, key="btn_generate_main")
+    generate_action = st.button("HEART", use_container_width=True, key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
@@ -495,6 +505,10 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
@@ -626,3 +640,4 @@ if generate_action:
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
+                    
