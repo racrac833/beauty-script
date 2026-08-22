@@ -13,7 +13,7 @@ load_dotenv()
 
 st.set_page_config(page_title="RAMILOVE", layout="wide")
 
-# 세션 상태 초기화
+# 1. 세션 상태 초기화
 if "brand_name" not in st.session_state:
     st.session_state.brand_name = ""
 if "product_usp" not in st.session_state:
@@ -39,16 +39,17 @@ if "insta_scene_count" not in st.session_state:
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
+# 2. 테마 컬러 정의 (현재 모드 기준 100% 동기화)
 is_insta = (st.session_state.content_mode == "instagram")
-
-# 스타일 CSS 주입
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
+
 current_theme_color = insta_gradient if is_insta else naver_green
+slider_active_color = "#e6683c" if is_insta else naver_green
 
 st.markdown(f"""
 <style>
-    /* 1. 중앙 정렬 RAMILOVE 타이틀 */
+    /* 1. 중앙 타이틀 */
     .ramilove-header {{
         text-align: center;
         font-size: 38px !important;
@@ -60,7 +61,7 @@ st.markdown(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 3단 네비게이션 가로 1열 완벽 대칭 레이아웃 */
+    /* 2. 상단 3단 네비게이션 가로 1열 완벽 대칭 */
     div[data-testid="stHorizontalBlock"] {{
         display: flex !important;
         align-items: center !important;
@@ -121,7 +122,7 @@ st.markdown(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 중앙 하트 생성 버튼 (80px 정원형) */
+    /* 중앙 하트 생성 버튼 */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
@@ -235,7 +236,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더: 트랙 및 노브 스타일 */
+    /* 6. 슬라이더: 트랙 및 노브 테마 컬러 완벽 동기화 */
     div[data-testid="stSlider"] {{
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
@@ -244,20 +245,19 @@ st.markdown(f"""
         margin-top: 4px !important;
         margin-bottom: 0px !important;
         padding-bottom: 0px !important;
-        padding-left: 0px !important;
-        padding-right: 0px !important;
     }}
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #3b3f49 !important;
+        background-color: #383c46 !important;
         height: 6px !important;
         border-radius: 4px !important;
     }}
+    /* 슬라이더 손잡이(노브) */
     div[data-testid="stSlider"] div[role="slider"] {{
-        background: {insta_gradient if is_insta else naver_green} !important;
-        border: 2px solid #ffffff !important;
+        background: {slider_active_color} !important;
+        border: 2.5px solid #ffffff !important;
         width: 18px !important;
         height: 18px !important;
-        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.6)'} !important;
+        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.7)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.7)'} !important;
     }}
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
@@ -265,7 +265,7 @@ st.markdown(f"""
         display: none !important;
     }}
 
-    /* 7. 줄자형 눈금 점(마커): 슬라이더 바로 아래 초밀착 배치 */
+    /* 7. 줄자형 눈금 점(마커): 슬라이더 바로 밑 밀착 & 100% 가시성 확보 */
     .ruler-dot-wrapper {{
         display: flex !important;
         justify-content: space-between !important;
@@ -273,33 +273,34 @@ st.markdown(f"""
         width: calc(100% - 18px) !important;
         margin-left: 9px !important;
         margin-right: 9px !important;
-        margin-top: -14px !important; /* 슬라이더 바 바로 밑으로 초밀착 */
+        margin-top: -6px !important;
         margin-bottom: 14px !important;
         box-sizing: border-box !important;
         position: relative !important;
-        z-index: 1 !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
     }}
     .ruler-dot-item {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 0px !important;
-        height: 6px !important;
+        height: 8px !important;
     }}
     .ruler-dot {{
-        width: 4px !important;
-        height: 4px !important;
+        width: 5px !important;
+        height: 5px !important;
         border-radius: 50% !important;
-        background-color: #555a66 !important;
+        background-color: #6b7280 !important;
         transition: all 0.15s ease-in-out !important;
     }}
     .ruler-dot.active {{
-        background: {insta_gradient if is_insta else naver_green} !important;
-        box-shadow: {'0 0 6px rgba(220, 39, 67, 0.9)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.9)'} !important;
+        background: {slider_active_color} !important;
+        box-shadow: {'0 0 8px rgba(220, 39, 67, 1)' if is_insta else '0 0 8px rgba(3, 199, 90, 1)'} !important;
         transform: scale(1.6) !important;
     }}
 
-    /* 8. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
+    /* 8. 결과창 헤더 뱃지 */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -336,7 +337,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 9. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
+    /* 9. 결과창 코드 블록 자동 줄바꿈 & 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -409,7 +410,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# 중앙 영문 타이틀 출력
+# 중앙 타이틀 출력
 st.markdown('<div class="ramilove-header">RAMILOVE</div>', unsafe_allow_html=True)
 
 # API 클라이언트 초기화
@@ -547,10 +548,9 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 및 초밀착 눈금 점(마커)
+    # 슬라이더 및 초밀착 눈금 점(마커) 완벽 렌더링
     if is_insta:
         st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
-        
         dot_items = []
         for val in range(6, 13):
             is_active = (val == st.session_state.insta_scene_count)
@@ -559,7 +559,6 @@ with st.sidebar:
         st.markdown(f'<div class="ruler-dot-wrapper">{"".join(dot_items)}</div>', unsafe_allow_html=True)
     else:
         st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
-        
         dot_items = []
         for val in range(8, 21):
             is_active = (val == st.session_state.blog_photo_count)
@@ -880,4 +879,3 @@ else:
         f'<div class="empty-result-box">아직 생성된 {main_title}가 없습니다.<br>상단 중앙의 <b>하트(❤️) 버튼</b>을 누르면 생성이 시작됩니다.</div>', 
         unsafe_allow_html=True
     )
-    
