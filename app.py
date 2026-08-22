@@ -34,6 +34,8 @@ if "blog_result" not in st.session_state:
     st.session_state.blog_result = ""
 if "product_category" not in st.session_state:
     st.session_state.product_category = "기초/스킨케어"
+if "insta_scene_count" not in st.session_state:
+    st.session_state.insta_scene_count = 7
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
@@ -448,13 +450,19 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
+    # 공통: 제품 카테고리
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     cat_index = categories.index(st.session_state.product_category) if st.session_state.product_category in categories else 0
     product_category = st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, index=cat_index)
     st.session_state.product_category = product_category
 
-    blog_photo_count = st.slider("블로그 사진 장수 (원고 분량 조절)", min_value=8, max_value=20, value=st.session_state.blog_photo_count, step=1)
-    st.session_state.blog_photo_count = blog_photo_count
+    # 모드별 분량 슬라이더
+    if is_insta:
+        insta_scene_count = st.slider("인스타 영상 장면 수 (6~12장)", min_value=6, max_value=12, value=st.session_state.insta_scene_count, step=1)
+        st.session_state.insta_scene_count = insta_scene_count
+    else:
+        blog_photo_count = st.slider("블로그 사진 장수 (8~20장)", min_value=8, max_value=20, value=st.session_state.blog_photo_count, step=1)
+        st.session_state.blog_photo_count = blog_photo_count
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -505,53 +513,57 @@ if generate_action:
                 contents.append(Image.open(img))
 
         if is_insta:
-            with st.spinner("가독성 줄바꿈 및 심의 준수 30초 이상 고품질 릴스 콘티를 작성 중입니다..."):
+            target_scenes = st.session_state.insta_scene_count
+            with st.spinner(f"[{product_category}] 맞춤 장면 {target_scenes}개 구성의 릴스 콘티를 작성 중입니다..."):
                 system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 전문 최고급 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
-사용자가 제공하는 [가이드라인 이미지/텍스트, 제품 상세페이지 내용, 제품 USP, 이벤트/공구/기획전 정보]를 완벽히 분석하여, 초반 3초 극강 후킹, [베스트 썸네일] 및 [추천 썸네일 문구 5선], 7~8개의 알찬 핵심 장면으로 구성된 30초~45초 러닝타임의 고품질 릴스 촬영 콘티를 작성합니다.
+사용자가 제공하는 [카테고리: {product_category}, 장면 수: {target_scenes}개, 가이드라인, 제품 상세페이지 내용, 제품 USP, 행사 정보]를 분석하여 최적화된 릴스 촬영 콘티를 작성합니다.
+
+[카테고리별 숏폼 연출 특화 지침 - 현재 카테고리: {product_category}]
+- 기초/스킨케어: 텍스처 수분 광채 클로즈업, 부위별 롤링/흡수 모션, 결 정돈 비포애프터
+- 색조/메이크업: 본통 컬러 팁 컷, 자연광 피부/입술 발색 모션, 밀착력 및 묻어남 방지 테스트
+- 선케어/클렌징: 백탁 없는 투명 밀착 발림, 메이크업 세정 롤링 액션, 산뜻한 마무리감
+- 헤어/바디: 풍성한 거품 텍스처 연출, 젖은/마른 모발 윤기 변화, 기분 좋은 잔향 묘사
+- 이너뷰티/다이어트: 파우치/스틱 이지컷 오픈 컷, 섭취 모션, 가방 속 휴대 루틴
+- 뷰티소품/디바이스: 기기 헤드 클로즈업, 턱선/광대/목선 리프팅 롤링 모션, 간편한 조작법
 
 [핵심 절대 원칙 (CRITICAL)]
 
-1. [가로 스크롤 방지 줄바꿈 원칙 (STRICT)]:
-- 대본의 모든 텍스트(설명, 나레이션, 캡션)는 1줄당 20~30자 내외로 자연스럽게 엔터(줄바꿈)를 쳐서 가로로 길어지지 않게 작성하세요.
+1. [정확히 {target_scenes}개 핵심 씬 구성 (STRICT)]:
+- 반드시 [1. 장면]부터 [ {target_scenes}. 장면]까지 정확히 {target_scenes}개의 장면으로만 구성합니다.
+- 마지막 장면([ {target_scenes}. 장면])은 반드시 프로모션 일정, 할인 가격, 구매처 안내 및 마무리 컷으로 배치합니다.
+- 하단 장면 요약 역시 1번부터 {target_scenes}번까지 {target_scenes}줄로 정확히 일치시킵니다.
 
-2. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN - 법적 심의)]:
-- '시술', '시술급', '시술받은 것처럼', '피부과 시술', '보톡스', '필러', '리쥬란', '레이저', '주사' 등 모든 의학적/피부과 시술 단어 및 시술과 비교/유사성을 암시하는 표현을 일체 사용하지 마세요.
-- 오직 "화장품 본연의 발림성, 촉촉함, 영양감, 쿨링감, 수분 광채, 탄력감, 괄사 롤링 마사지 편의성" 등 순수한 홈케어 화장품 사용 경험으로만 묘사하세요.
+2. [가로 스크롤 방지 20~30자 줄바꿈 (STRICT)]:
+- 썸네일 설명, 씬별 비주얼 연출 설명, 나레이션 문장, #광고 캡션 등 모든 텍스트는 1줄당 20~30자 내외로 자연스럽게 엔터(줄바꿈)를 쳐서 가로 스크롤이 절대 생기지 않도록 작성하세요.
 
-3. [종결 어미 스타일 엄수]:
+3. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN)]:
+- '시술', '시술급', '시술받은 것처럼', '보톡스', '필러', '리쥬란', '레이저' 등 모든 시술명 및 비교 표현 절대 금지.
+- 순수 홈케어 화장품 사용 경험과 만족감으로만 작성하세요.
+
+4. [종결 어미 스타일 엄수]:
 - '~했다', '~해봤다', '~붙여봤다' 등 딱딱하게 끝나는 종결형 어미를 절대 쓰지 마세요.
 - 부드러운 연결형이나 솔직한 구어체로 표현하세요 (~해보고, ~발라봤는데, ~직접 써보니까 등).
 
-4. [썸네일 필수 구성 (베스트 1종 + 추천 5선)]:
-- 최상단에 썸네일 비주얼 연출 컷 설명, [베스트 썸네일], 그리고 [추천 썸네일 문구 5선](1~5번)을 반드시 별도로 전부 작성합니다.
-- 모든 썸네일은 2줄 형태이며, 첫째 줄은 공백 제외 10자 이내, 둘째 줄은 공백 제외 12자 이내를 엄수합니다.
+5. [썸네일 필수 구성 (베스트 1종 + 추천 5선)]:
+- 최상단에 썸네일 비주얼 연출 컷 설명, [베스트 썸네일], 그리고 [추천 썸네일 문구 5선](1~5번)을 별도로 전부 작성합니다. (1줄 10자 이내 / 2줄 12자 이내)
 
-5. [자막 분절 요약 원칙]:
-- 각 장면의 나레이션 문장을 크게 전반부와 후반부 2개의 핵심 의미로 나눈 뒤, 자막은 반드시 아래와 같이 [앞쪽 나레이션 요약 / 뒤쪽 나레이션 요약] 구조로 작성합니다.
-- 자막 줄바꿈 시 슬래시(/)는 반드시 단독 줄로 배치합니다.
+6. [자막 분절 요약 원칙]:
+- 각 장면의 나레이션 문장을 크게 전반부와 후반부 2개로 나누어 [앞쪽 나레이션 요약 / 뒤쪽 나레이션 요약] 형태로 작성합니다. (슬래시 / 는 단독 줄)
 
-6. [7~8개 핵심 씬 구성 및 30초 이상 나레이션]:
-- 장면 갯수는 [1. 장면]부터 [7. 장면] 또는 [8. 장면]까지 핵심 7~8개 씬으로 구성합니다.
-- 전체 나레이션 분량은 빠른 구어체 30초 이상(공백 포함 450~550자 내외)으로 풍성하게 작성합니다.
-
-7. [서술어 중복 절대 금지]:
-- 한 대본 내에서 동일한 서술어나 종결 어미가 2회 이상 반복되지 않도록 다양화합니다.
-
-8. [브랜드명 및 필수 요소 원형 유지]:
+7. [브랜드명 원형 유지]:
 - 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
-- 필수 해시태그('{essential_tags}') 및 행사 정보('{event_info}')를 완벽히 반영합니다.
 
 [출력 양식 템플릿]
 
 썸네일
-썸네일(비주얼 연출 컷 설명) : (영상의 핵심 후킹을 담은 직관적인 비주얼 연출 묘사 /
-20~30자 단위로 적절히 줄바꿈)
+썸네일(비주얼 연출 컷 설명) : ({product_category} 특성을 살린 후킹 비주얼 /
+20~30자 단위 줄바꿈)
 
 [베스트 썸네일]
-(첫째 줄: 띄어쓰기 포함, 공백 제외 10자 이내)
-(둘째 줄: 띄어쓰기 포함, 공백 제외 12자 이내)
+(첫째 줄: 띄어쓰기 포함 10자 이내)
+(둘째 줄: 띄어쓰기 포함 12자 이내)
 
 [추천 썸네일 문구 5선]
 1.
@@ -575,108 +587,23 @@ if generate_action:
 (둘째 줄)
 
 
-[1. 장면]
-카메라 앵글/그린스크린 → 인물 행동
-→ 제품 포인트 연출 흐름
+[1. 장면] 부터 [ {target_scenes}. 장면] 까지 순서대로:
+
+[장면 번호]
+카메라 앵글 → 인물 행동 및 제품 포인트 흐름
+(20~30자 단위로 줄바꿈)
 
 자막：
-(앞쪽 나레이션 요약 문장)
+(앞쪽 나레이션 요약)
 /
-(뒤쪽 나레이션 요약 문장)
-/
-(필요시 로고 또는 제품명)
+(뒤쪽 나레이션 요약)
 
 나레이션：
 (30대 여성이 말하는 솔직하고 빠른 구어체 대사 /
-한 줄이 길어지지 않게 20~30자 내외로
-자연스럽게 줄바꿈하여 작성)
+20~30자 내외로 자연스럽게 줄바꿈하여 작성)
 
 
-[2. 장면]
-고민 부위 클로즈업 → 제품 토출
-및 텍스처 연출 흐름
-
-자막：
-(앞쪽 나레이션 요약 문장)
-/
-(뒤쪽 나레이션 요약 문장)
-/
-비포 애프터
-
-나레이션：
-(대사 / 적절한 줄바꿈)
-
-
-[3. 장면]
-롤링 마사지 및 부위별 케어 연출 흐름
-
-자막：
-(앞쪽 나레이션 요약 문장)*
-(하단 각주 삽입)
-*각주 내용
-/
-(뒤쪽 나레이션 요약 문장)
-
-나레이션：
-(대사 / 적절한 줄바꿈)
-
-
-[4. 장면]
-전후 비교 체감 비포&애프터
-및 광채 탄력 연출 흐름
-
-자막：
-(앞쪽 나레이션 요약 문장)
-/
-(뒤쪽 나레이션 요약 문장)
-
-나레이션：
-(대사 / 적절한 줄바꿈)
-
-
-[5. 장면]
-풀페이스 확장 케어 꿀팁 연출 흐름
-
-자막：
-(앞쪽 나레이션 요약 문장)
-/
-(뒤쪽 나레이션 요약 문장)
-
-나레이션：
-(대사 / 적절한 줄바꿈)
-
-
-[6. 장면]
-탄력 개선 비교 및 총평 연출 흐름
-
-자막：
-비포 애프터
-/
-(앞쪽 나레이션 요약 문장)
-/
-(뒤쪽 나레이션 요약 문장)
-
-나레이션：
-(대사 / 적절한 줄바꿈)
-
-
-[7. 장면]
-프로모션 일정, 할인 가격,
-올리브영 특가 구매처 안내 및 마무리 컷
-
-자막：
-비포 애프터
-/
-(프로모션 기간/일정)
-/
-(할인 안내 및 구매처)
-(하단 각주 삽입)
-*각주 내용 (있을 경우)
-
-나레이션：
-(행사 혜택 및 추천 마무리 대사 /
-20~30자 단위 줄바꿈)
-
+(마지막 {target_scenes}번 씬 하단):
 로고 초반에 삽입 / 음악ㅇ / 끝
 
 
@@ -685,8 +612,7 @@ if generate_action:
 (30대 여성 찐후기 톤: 리얼 후킹 문구)
 
 (솔직 사용 경험 및 핵심 장점 설명 /
-한 줄로 길게 늘어지지 않게 20~30자마다
-자연스럽게 엔터로 줄바꿈하여 작성)
+한 줄로 길어지지 않게 20~30자마다 엔터로 줄바꿈)
 
 (기획전/특가 일정, 할인 가격, 구매처 안내 포함)
 
@@ -695,30 +621,21 @@ if generate_action:
 
 댓글에 #올영1위 (또는 지정 댓글 태그)
 
+(1번 씬부터 {target_scenes}번 씬까지 순서대로 요약):
 장면： (1번 씬 연출 요약)
-
-장면： (2번 씬 연출 요약)
-
-장면： (3번 씬 연출 요약)
-
-장면： (4번 씬 연출 요약)
-
-장면： (5번 씬 연출 요약)
-
-장면： (6번 씬 연출 요약)
-
-장면： (7번 씬 연출 요약)
+...
+장면： ({target_scenes}번 씬 연출 요약)
 
 
 
 나레이션만 정리
-(1번부터 마지막 씬까지의 전체 나레이션 전문을 모아서
-각 호흡 단위/문장별로 20~30자 내외 줄바꿈하여 출력 /
-공백 포함 450~550자 내외)
+(1번부터 {target_scenes}번 씬까지의 전체 나레이션을 모아서
+각 문장별 20~30자 내외 줄바꿈하여 출력)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [가로 스크롤 방지 20~30자 줄바꿈], [시술명/시술비교 절대 금지], [베스트 썸네일 + 추천 5선], 부드러운 구어체 어미(~했다 금지)를 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿과 [카테고리: {product_category}], [정확히 {target_scenes}개 장면 구성], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 카테고리: {product_category}
+- 장면 수: {target_scenes}개 씬
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -744,11 +661,12 @@ if generate_action:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
         else:
-            with st.spinner(f"[{product_category}] 맞춤 사진 {blog_photo_count}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
+            target_photos = st.session_state.blog_photo_count
+            with st.spinner(f"[{product_category}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
                 system_instruction_blog = f"""
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
-사용자가 제공한 [카테고리, 사진 장수({blog_photo_count}장), 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
+사용자가 제공한 [카테고리: {product_category}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
 
 [카테고리별 전문 톤앤매너 지침 - 현재 카테고리: {product_category}]
 - 기초/스킨케어: 수분감, 속건조, 피부결 정돈, 유수분 밸런스, 쿨링감 중심
@@ -761,11 +679,11 @@ if generate_action:
 [핵심 절대 원칙 (CRITICAL)]
 
 1. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT - 가로 스크롤 절대 방지)]:
-- (촬영 가이드: ...) 설명이 한 줄로 길게 늘어지면 가로 스크롤이 생기므로, 반드시 촬영 가이드 텍스트도 20~30자 내외마다 엔터(줄바꿈)를 쳐서 2~3줄로 나누어 작성하세요.
+- (촬영 가이드: ...) 설명이 한 줄로 길게 늘어지지 않게 20~30자 내외마다 엔터(줄바꿈)를 쳐서 2~3줄로 나누어 작성하세요.
 - 본문 [원고 텍스트] 역시 1줄당 25~35자 내외로 자연스럽게 엔터를 쳐서 작성하세요.
 
-2. [사진 장수 정확히 {blog_photo_count}장 구성 (STRICT)]:
-- 사용자가 설정한 [사진 1]부터 [사진 {blog_photo_count}]까지 정확히 {blog_photo_count}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
+2. [사진 장수 정확히 {target_photos}장 구성 (STRICT)]:
+- 반드시 [사진 1]부터 [사진 {target_photos}]까지 정확히 {target_photos}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
 - 각 사진마다 '{product_category}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
 
 3. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
@@ -793,7 +711,7 @@ if generate_action:
 
 -------------------------------------------------------
 
-[사진 1] 부터 [사진 {blog_photo_count}] 까지 순서대로:
+[사진 1] 부터 [사진 {target_photos}] 까지 순서대로:
 
 [사진 번호]
 (촬영 가이드: {product_category} 특성에 맞춘 촬영 가이드 /
@@ -810,9 +728,9 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {product_category}], [사진 장수: 정확히 {blog_photo_count}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
+다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {product_category}], [사진 장수: 정확히 {target_photos}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 카테고리: {product_category}
-- 사진 장수: {blog_photo_count}장
+- 사진 장수: {target_photos}장
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -842,7 +760,7 @@ if generate_action:
 
 # ==================== [결과 화면: 독립 분리 및 대형 복사 아이콘 지원] ====================
 current_result = st.session_state.insta_result if is_insta else st.session_state.blog_result
-label_type = "인스타그램 대본" if is_insta else f"블로그 원고 ({st.session_state.product_category} / 사진 {st.session_state.blog_photo_count}장)"
+label_type = f"인스타그램 대본 ({st.session_state.product_category} / 장면 {st.session_state.insta_scene_count}개)" if is_insta else f"블로그 원고 ({st.session_state.product_category} / 사진 {st.session_state.blog_photo_count}장)"
 
 st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
 
