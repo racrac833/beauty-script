@@ -36,6 +36,7 @@ is_insta = (st.session_state.content_mode == "instagram")
 # 스타일 CSS 주입
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
+sky_blue = "#00A3FF"
 
 st.markdown(f"""
 <style>
@@ -51,26 +52,18 @@ st.markdown(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 1열 수평 정렬 컨테이너 내부 수직/수평 맞춤 */
+    /* 2. 1열 수평 정렬 컨테이너 내부 수직/수평 정렬 */
     div[data-testid="stHorizontalBlock"] {{
         align-items: center !important;
         justify-content: center !important;
     }}
 
-    /* 좌측 탭: INSTAGRAM (60% 슬림 폭) */
-    .st-key-tab_insta {{
-        display: flex !important;
-        justify-content: flex-end !important;
-        width: 100% !important;
-    }}
+    /* 좌측 탭: INSTAGRAM */
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
-        width: 60% !important;
-        min-width: 140px !important;
-        max-width: 220px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
@@ -80,20 +73,12 @@ st.markdown(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 우측 탭: BLOG (60% 슬림 폭) */
-    .st-key-tab_blog {{
-        display: flex !important;
-        justify-content: flex-start !important;
-        width: 100% !important;
-    }}
+    /* 우측 탭: BLOG */
     .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
-        width: 60% !important;
-        min-width: 140px !important;
-        max-width: 220px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
@@ -156,6 +141,50 @@ st.markdown(f"""
             if is_insta else "0 0 28px rgba(3, 199, 90, 0.8)"
         } !important;
     }}
+
+    /* 4. 사이드바 하늘색 분석 버튼 */
+    .st-key-btn_analyze button {{
+        background: {sky_blue} !important;
+        border: none !important;
+        border-radius: 12px !important;
+        height: 48px !important;
+        box-shadow: 0 4px 15px rgba(0, 163, 255, 0.4) !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    .st-key-btn_analyze button * {{
+        color: #ffffff !important;
+        font-size: 15px !important;
+        font-weight: 900 !important;
+    }}
+    .st-key-btn_analyze button:hover {{
+        background: #008be0 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(0, 163, 255, 0.6) !important;
+    }}
+
+    /* 5. 사이드바 하늘색 넘버링 뱃지 헤더 */
+    .sidebar-section-title {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 12px;
+    }}
+    .sky-badge {{
+        background: {sky_blue};
+        color: #ffffff;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 900;
+        box-shadow: 0 2px 8px rgba(0, 163, 255, 0.5);
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -200,7 +229,7 @@ def fetch_url_content(url):
         return ""
 
 with st.sidebar:
-    st.header("1️⃣ 가이드 & 제품 자료 등록")
+    st.markdown('<div class="sidebar-section-title"><span class="sky-badge">1</span> 가이드 & 제품 자료 등록</div>', unsafe_allow_html=True)
     uploaded_images = st.file_uploader(
         "📷 가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
         type=["png", "jpg", "jpeg", "webp"], 
@@ -220,7 +249,8 @@ with st.sidebar:
         placeholder="필수 멘트, 추가 행사 정보, 강조점 등을 입력하세요."
     )
     
-    analyze_btn = st.button("⚡ 자료 종합 분석 & 입력창 채우기", use_container_width=True)
+    # 하늘색 + 아래 화살표 분석 버튼
+    analyze_btn = st.button("⬇️ 자료 종합 분석 & 아래 입력창 채우기", use_container_width=True, key="btn_analyze")
     
     if analyze_btn:
         if not uploaded_images and not guideline_url.strip() and not product_url.strip() and not guideline_text.strip():
@@ -283,7 +313,7 @@ with st.sidebar:
                     st.session_state.account_tags = data.get("account_tags", "")
                     st.session_state.event_info = data.get("event_info", "")
                     
-                    st.success("✅ 분석 완료! 추출된 내용을 확인하고 필요시 수정해주세요.")
+                    st.success("✅ 분석 완료! 아래 추출된 내용을 확인하고 필요시 수정해주세요.")
                     
                     if (g_crawl_fail or p_crawl_fail) and not uploaded_images:
                         st.info("💡 팁: 앱 전용 웹뷰(오늘룩)나 일부 쇼핑몰은 웹 보안상 링크 직접 읽기가 제한됩니다. 가이드 화면을 캡처해서 상단 '📷 이미지 첨부'에 올리시면 100% 완벽하게 인식됩니다.")
@@ -291,7 +321,7 @@ with st.sidebar:
                     st.error(f"분석 중 오류가 발생했습니다: {e}")
 
     st.markdown("---")
-    st.header("2️⃣ 추출 정보 확인 및 수정")
+    st.markdown('<div class="sidebar-section-title"><span class="sky-badge">2</span> 추출 정보 확인 및 수정</div>', unsafe_allow_html=True)
     
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -312,11 +342,11 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [대칭 3단 정렬: INSTAGRAM(우측정렬) - 하트(정중앙) - BLOG(좌측정렬)] ====================
-col_insta, col_heart, col_blog = st.columns([0.43, 0.14, 0.43])
+# ==================== [대칭 1열 정렬: 여백15% - INSTAGRAM30% - 하트10% - BLOG30% - 여백15%] ====================
+pad_l, col_insta, col_heart, col_blog, pad_r = st.columns([0.15, 0.30, 0.10, 0.30, 0.15])
 
 with col_insta:
-    if st.button("INSTAGRAM", key="tab_insta"):
+    if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
         st.session_state.content_mode = "instagram"
         st.rerun()
 
@@ -324,7 +354,7 @@ with col_heart:
     generate_action = st.button("EXECUTE", key="btn_generate_main")
 
 with col_blog:
-    if st.button("BLOG", key="tab_blog"):
+    if st.button("BLOG", use_container_width=True, key="tab_blog"):
         st.session_state.content_mode = "blog"
         st.rerun()
 
