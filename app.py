@@ -29,87 +29,77 @@ if "event_info" not in st.session_state:
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
 
-# 모드 판별
 is_insta = (st.session_state.content_mode == "instagram")
 
-# 스타일 CSS 주입
+# 다크/라이트 모드 무관 100% 강제 적용 CSS
 st.markdown(f"""
 <style>
-    /* 상단 라미럽 타이틀 */
-    h1 {{
-        font-size: 32px !important;
+    /* 1. 라미럽 타이틀 (다크모드에서도 눈에 확 띄는 화이트/볼드) */
+    .ramilove-title {{
+        font-size: 34px !important;
         font-weight: 900 !important;
-        color: #111111 !important;
-        padding-top: 10px !important;
-        padding-bottom: 15px !important;
+        color: #FFFFFF !important;
+        margin-top: 5px !important;
+        margin-bottom: 25px !important;
         letter-spacing: -0.5px !important;
+        display: block !important;
     }}
 
-    /* 상단 모드 선택 버튼 2개 */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(1) button {{
-        background: {'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' if is_insta else '#f1f3f5'} !important;
-        color: {'#ffffff' if is_insta else '#495057'} !important;
-        font-size: 18px !important;
+    /* 2. 상단 2분할 탭 버튼 강제 스타일 */
+    div[data-testid="column"]:nth-of-type(1) button {{
+        background: {'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' if is_insta else '#2b2d30'} !important;
+        color: {'#ffffff' if is_insta else '#8b949e'} !important;
+        font-size: 19px !important;
         font-weight: 800 !important;
-        height: 50px !important;
-        border: {'none' if is_insta else '1px solid #ced4da'} !important;
-        border-radius: 30px !important;
-        box-shadow: {'0 4px 12px rgba(220, 39, 67, 0.35)' if is_insta else 'none'} !important;
+        height: 52px !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #444c56'} !important;
+        border-radius: 26px !important;
+        box-shadow: {'0 0 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
 
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {{
-        background: {'#03C75A' if not is_insta else '#f1f3f5'} !important;
-        color: {'#ffffff' if not is_insta else '#495057'} !important;
-        font-size: 18px !important;
+    div[data-testid="column"]:nth-of-type(2) button {{
+        background: {'#03C75A' if not is_insta else '#2b2d30'} !important;
+        color: {'#ffffff' if not is_insta else '#8b949e'} !important;
+        font-size: 19px !important;
         font-weight: 800 !important;
-        height: 50px !important;
-        border: {'none' if not is_insta else '1px solid #ced4da'} !important;
-        border-radius: 30px !important;
-        box-shadow: {'0 4px 12px rgba(3, 199, 90, 0.35)' if not is_insta else 'none'} !important;
+        height: 52px !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #444c56'} !important;
+        border-radius: 26px !important;
+        box-shadow: {'0 0 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
 
-    /* 중앙 생성하기 버튼 (원형 캡슐 디자인 + 슬림 폭) */
-    .round-btn-container {{
-        display: flex;
-        justify-content: center;
-        margin: 20px 0 30px 0;
-    }}
-    
-    .round-btn-container div[data-testid="stButton"] {{
-        width: 320px !important;
-    }}
-
-    .round-btn-container button {{
+    /* 3. 하단 메인 생성하기 버튼 (원형 캡슐 + 고대비 컬러) */
+    div.stButton > button[key="btn_generate_main"] {{
         background: {
             "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" 
             if is_insta else "#03C75A"
         } !important;
         color: #ffffff !important;
-        font-size: 18px !important;
-        font-weight: 800 !important;
-        height: 52px !important;
+        font-size: 20px !important;
+        font-weight: 900 !important;
         border: none !important;
         border-radius: 50px !important;
+        height: 56px !important;
         box-shadow: {
-            "0 4px 15px rgba(220, 39, 67, 0.4)" 
-            if is_insta else "0 4px 15px rgba(3, 199, 90, 0.4)"
+            "0 6px 20px rgba(220, 39, 67, 0.6)" 
+            if is_insta else "0 6px 20px rgba(3, 199, 90, 0.6)"
         } !important;
-        transition: all 0.2s ease-in-out !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }}
 
-    .round-btn-container button:hover {{
+    div.stButton > button[key="btn_generate_main"]:hover {{
         transform: translateY(-2px) !important;
         box-shadow: {
-            "0 6px 20px rgba(220, 39, 67, 0.5)" 
-            if is_insta else "0 6px 20px rgba(3, 199, 90, 0.5)"
+            "0 8px 25px rgba(220, 39, 67, 0.8)" 
+            if is_insta else "0 8px 25px rgba(3, 199, 90, 0.8)"
         } !important;
         opacity: 0.95 !important;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# 메인 타이틀
-st.title("라미럽")
+# 타이틀 출력
+st.markdown('<div class="ramilove-title">라미럽</div>', unsafe_allow_html=True)
 
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
@@ -243,7 +233,7 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [메인 영역: 채널 선택 탭] ====================
+# ==================== [메인 영역: 상단 채널 선택 버튼 2개] ====================
 col1, col2 = st.columns(2)
 
 with col1:
@@ -256,21 +246,28 @@ with col2:
         st.session_state.content_mode = "blog"
         st.rerun()
 
-# ==================== [선택된 모드에 따른 생성 실행] ====================
+st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
-if st.session_state.content_mode == "instagram":
-    # 둥근 캡슐형 생성 버튼 (중앙 정렬)
-    st.markdown('<div class="round-btn-container">', unsafe_allow_html=True)
-    generate_insta = st.button("인스타그램 대본 생성하기", key="btn_insta_main")
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    if generate_insta:
-        if not brand_name or not product_usp:
-            st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
-        else:
+# ==================== [선택된 모드에 따른 중앙 캡슐형 생성 버튼] ====================
+btn_col1, btn_col2, btn_col3 = st.columns([1, 2, 1])
+
+with btn_col2:
+    btn_label = "📸 인스타그램 대본 생성하기" if is_insta else "📝 블로그 원고 생성하기"
+    generate_action = st.button(btn_label, use_container_width=True, key="btn_generate_main")
+
+# ==================== [대본 / 원고 생성 실행 로직] ====================
+if generate_action:
+    if not brand_name or not product_usp:
+        st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
+    else:
+        url_context = get_url_context()
+        contents = []
+        if uploaded_images:
+            for img in uploaded_images:
+                contents.append(Image.open(img))
+
+        if is_insta:
             with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 인스타그램 대본을 작성 중입니다..."):
-                url_context = get_url_context()
-
                 system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
@@ -382,10 +379,6 @@ if st.session_state.content_mode == "instagram":
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
-                contents = []
-                if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
@@ -397,26 +390,15 @@ if st.session_state.content_mode == "instagram":
                             temperature=0.4,
                         )
                     )
-                    st.success("인스타그램 대본이 성공적으로 완성되었습니다!")
+                    st.success("📸 인스타그램 대본이 성공적으로 완성되었습니다!")
                     st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
                     st.markdown("---")
                     st.markdown(response.text)
                 except Exception as e:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
-else:
-    # 둥근 캡슐형 생성 버튼 (중앙 정렬)
-    st.markdown('<div class="round-btn-container">', unsafe_allow_html=True)
-    generate_blog = st.button("블로그 원고 생성하기", key="btn_blog_main")
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    if generate_blog:
-        if not brand_name or not product_usp:
-            st.warning("왼쪽 사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
         else:
             with st.spinner("네이버 뷰티 인플루언서 스타일로 SEO 최적화 블로그 원고를 작성 중입니다..."):
-                url_context = get_url_context()
-
                 system_instruction_blog = f"""
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
@@ -507,10 +489,6 @@ else:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
-                contents = []
-                if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
@@ -522,7 +500,7 @@ else:
                             temperature=0.4,
                         )
                     )
-                    st.success("블로그 원고가 성공적으로 완성되었습니다!")
+                    st.success("📝 블로그 원고가 성공적으로 완성되었습니다!")
                     st.text_area("📋 블로그/워드 복사용 (전체 선택 후 복사)", response.text, height=400)
                     st.markdown("---")
                     st.markdown(response.text)
