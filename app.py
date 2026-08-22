@@ -130,22 +130,31 @@ if not api_key:
 client = genai.Client(api_key=api_key)
 
 class ExtractedGuide(BaseModel):
-    brand_name: str = Field(description="가이드/상세페이지/이미지에서 확인된 원문 그대로의 정확한 브랜드명 (단 1글자도 변경/번역 금지)")
-    product_usp: str = Field(description="제품의 핵심 USP, 제형 특성, 주요 성분 및 임상 효과 요약")
+    brand_name: str = Field(description="가이드/상세페이지에서 소개하는 실제 화장품/뷰티 브랜드명 (체험단 플랫폼명인 '오늘룩', 'oneulook' 등은 절대 브랜드명이 아님)")
+    product_usp: str = Field(description="실제 제품의 핵심 USP, 제형 특성, 주요 성분 및 효과 요약")
     target_audience: str = Field(description="타겟층 정보 (기본: 30대 여성)")
-    essential_tags: str = Field(description="가이드에 명시된 필수 해시태그 목록 (#포함하여 쉼표로 연결)")
-    account_tags: str = Field(description="가이드에 명시된 공식 계정 태그 (@포함)")
-    event_info: str = Field(description="정확한 프로모션 일정(예: 8월 1일~8월 29일), 할인 가격, 혜택, 구매처")
+    essential_tags: str = Field(description="가이드에 명시된 필수 해시태그 목록 (#포함)")
+    account_tags: str = Field(description="실제 브랜드의 공식 계정 태그 (@포함, 체험단 중개 계정 제외)")
+    event_info: str = Field(description="실제 소비자가 보는 프로모션 일정, 할인 가격, 구매처")
 
 def fetch_url_content(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        # 브라우저 위장 강화 헤더
+        headers = {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Referer": "https://m.oliveyoung.co.kr/"
+        }
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-            for script in soup(["script", "style", "nav", "footer"]):
+            for script in soup(["script", "style", "nav", "footer", "noscript"]):
                 script.decompose()
             text = soup.get_text(separator=" ", strip=True)
+            # 만약 로그인 화면이나 껍데기만 긁힌 경우 방어
+            if len(text) < 100:
+                return ""
             return text[:4000]
         return ""
     except Exception:
@@ -154,12 +163,13 @@ def fetch_url_content(url):
 with st.sidebar:
     st.header("1️⃣ 가이드 & 제품 자료 등록")
     uploaded_images = st.file_uploader(
-        "📷 가이드라인 / 기획안 이미지 첨부", 
+        "📷 가이드라인 / 기획안 캡처 이미지 첨부 (권장)", 
         type=["png", "jpg", "jpeg", "webp"], 
-        accept_multiple_files=True
+        accept_multiple_files=True,
+        help="체험단 앱(오늘룩, 레뷰 등) 웹뷰는 보안상 링크 대신 화면을 캡처해서 올려주시면 100% 정확하게 인식합니다."
     )
     guideline_url = st.text_input(
-        "🔗 가이드라인 링크 URL (노션, 구글문서 등)",
+        "🔗 가이드라인 링크 URL (노션, 웹페이지 등)",
         placeholder="https://notion.so/..."
     )
     product_url = st.text_input(
@@ -177,17 +187,24 @@ with st.sidebar:
         if not uploaded_images and not guideline_url.strip() and not product_url.strip() and not guideline_text.strip():
             st.warning("분석할 이미지, 링크 또는 메모를 하나 이상 입력해주세요.")
         else:
-            with st.spinner("가이드와 상세페이지를 종합 분석하여 정보를 추출 중입니다..."):
+            with st.spinner("가이드와 상세페이지를 정밀 분석 중입니다..."):
                 url_context = ""
+                g_crawl_fail = False
+                p_crawl_fail = False
+
                 if guideline_url.strip():
                     g_text = fetch_url_content(guideline_url.strip())
                     if g_text:
                         url_context += f"\n[가이드라인 링크 내용]:\n{g_text}\n"
+                    else:
+                        g_crawl_fail = True
                 
                 if product_url.strip():
                     p_text = fetch_url_content(product_url.strip())
                     if p_text:
                         url_context += f"\n[제품 상세페이지 내용]:\n{p_text}\n"
+                    else:
+                        p_crawl_fail = True
 
                 contents = []
                 if uploaded_images:
@@ -195,14 +212,14 @@ with st.sidebar:
                         contents.append(Image.open(img_file))
                 
                 extract_prompt = f"""
-제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 100% 정밀 분석하여 다음 항목을 정확히 추출하세요.
+제공된 가이드라인 이미지, 가이드 링크, 제품 상세페이지 내용, 메모를 정밀 분석하여 실제 화장품/제품에 대한 정보를 정확히 추출하세요.
 
-[추출 주의사항]
-1. 브랜드명: 원문 그대로 단 1글자도 변경/번역/축약하지 말고 추출
-2. 제품 USP: 상세페이지와 가이드에서 강조하는 제형, 핵심 성분, 임상시험 수치, 실제 체감 장점을 매력적으로 요약
-3. 행사 정보: 가이드의 내부 코드가 아닌, 실제 소비자에게 안내할 '정확한 프로모션 기간(예: 8월 1일~8월 29일)', '할인 가격/혜택', '구매처' 형태로 정제하여 추출
-4. 필수 해시태그: 가이드 전체에서 필수 해시태그(#...)를 찾아 추출
-5. 계정 태그: 공식 인스타그램 계정(@...) 추출
+[절대 주의사항 (STRICT)]
+1. '오늘룩(oneulook)', '레뷰(revu)', '체험단' 등은 마케팅 중개 플랫폼일 뿐 실제 화장품 브랜드명이 아닙니다. 절대 이를 브랜드명이나 해시태그로 추출하지 마세요.
+2. 이미지와 상세페이지에 나오는 '실제 뷰티 제품의 브랜드명(예: 엑시스와이, 넘버즈인, 아누아 등)'과 '제품명'을 정확히 추출하세요.
+3. 제품 USP: 제품의 실제 성분, 텍스처(제형), 고민 부위 해결 효과, 임상시험 수치 추출
+4. 행사 정보: 올리브영 프로모션 일정, 할인율/가격, 구매처 추출
+5. 필수 해시태그: 가이드에 지정된 실제 제품 필수 해시태그만 추출 (플랫폼 태그 제외)
 
 [추가 메모]: {guideline_text}
 {url_context}
@@ -227,7 +244,10 @@ with st.sidebar:
                     st.session_state.account_tags = data.get("account_tags", "")
                     st.session_state.event_info = data.get("event_info", "")
                     
-                    st.success("✅ 자동 분석 완료! 아래 내용을 확인 후 필요시 수정하세요.")
+                    st.success("✅ 분석 완료! 추출된 내용을 확인하고 필요시 수정해주세요.")
+                    
+                    if (g_crawl_fail or p_crawl_fail) and not uploaded_images:
+                        st.info("💡 팁: 앱 전용 웹뷰(오늘룩)나 일부 쇼핑몰은 웹 보안상 링크 직접 읽기가 제한됩니다. 가이드 화면을 캡처해서 상단 '📷 이미지 첨부'에 올리시면 100% 완벽하게 인식됩니다.")
                 except Exception as e:
                     st.error(f"분석 중 오류가 발생했습니다: {e}")
 
