@@ -39,19 +39,17 @@ if "insta_scene_count" not in st.session_state:
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
-# 기본 변수 안전 초기화
+# 쿼리 파라미터나 콜백 처리를 위한 안전 변수
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 CSS 스타일링 (노란색 슬라이더 적용)] ====================
+# ==================== [2. 테마 컬러 및 커스텀 줄자 CSS 스타일링] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
-
-# 슬라이더 전용 단색 노란색 컬러 정의
-slider_yellow = "#FFD700"
+active_dot_color = "#e6683c" if is_insta else "#03C75A"
 
 st.markdown(f"""
 <style>
@@ -242,30 +240,72 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 슬라이더 전용 단색 노란색 스타일 적용 */
-    div[data-testid="stSlider"] {{
-        margin-bottom: 14px !important;
+    /* 6. 커스텀 줄자 셀렉터(Ruler Selector) 스타일 */
+    .ruler-container {{
+        background: #262930;
+        border: 1px solid #3d424b;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 15px;
     }}
-    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 6px !important;
-        margin-bottom: 6px !important;
+    .ruler-header-row {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 700;
     }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #383c46 !important;
-        height: 6px !important;
-        border-radius: 4px !important;
+    .ruler-value-badge {{
+        background: {active_dot_color};
+        color: #ffffff;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 900;
     }}
-    /* 슬라이더 채워진 바(Progress) 컬러 강제 노란색 지정 */
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
-        background: {slider_yellow} !important;
+    .ruler-track {{
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #3b3f49;
+        height: 6px;
+        border-radius: 3px;
+        margin: 12px 10px;
     }}
-    /* 슬라이더 손잡이(노브) 컬러 강제 노란색 지정 */
-    div[data-testid="stSlider"] div[role="slider"] {{
-        background: {slider_yellow} !important;
-        border: 2.5px solid #ffffff !important;
-        width: 18px !important;
-        height: 18px !important;
-        box-shadow: 0 0 8px rgba(255, 215, 0, 0.8) !important;
+    .ruler-node {{
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+    }}
+    .ruler-dot {{
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #8c92a0;
+        transition: all 0.2s ease-in-out;
+    }}
+    .ruler-dot.active {{
+        background-color: {active_dot_color};
+        width: 14px;
+        height: 14px;
+        box-shadow: 0 0 10px {active_dot_color};
+        border: 2px solid #ffffff;
+    }}
+    .ruler-num {{
+        position: absolute;
+        top: 14px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #9aa0a6;
+    }}
+    .ruler-num.active {{
+        color: #ffffff;
+        font-weight: 900;
     }}
 
     /* 7. 결과창 헤더 뱃지 */
@@ -534,11 +574,44 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 설정 (노란색 단색 적용)
+    # ==================== [정밀 커스텀 줄자 셀렉터 구현] ====================
     if is_insta:
-        st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
+        st.markdown(f"""
+        <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:6px; display:flex; align-items:center; gap:7px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
+            인스타 영상 장면 수 (6~12장)
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # 버튼형 클릭으로 값 변경 처리 (상태 유지)
+        cols_scene = st.columns(7)
+        for i, val in enumerate(range(6, 13)):
+            with cols_scene[i]:
+                is_selected = (st.session_state.insta_scene_count == val)
+                btn_type = "primary" if is_selected else "secondary"
+                if st.button(str(val), key=f"scene_{val}", use_container_width=True):
+                    st.session_state.insta_scene_count = val
+                    st.rerun()
     else:
-        st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
+        st.markdown(f"""
+        <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:6px; display:flex; align-items:center; gap:7px;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
+            블로그 사진 장수 (8~20장)
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # 블로그 사진 장수 선택 버튼 (2행으로 분할하여 깔끔하게 배치)
+        photo_vals = list(range(8, 21))
+        row1 = st.columns(7)
+        row2 = st.columns(6)
+        
+        for i, val in enumerate(photo_vals):
+            target_col = row1[i] if i < 7 else row2[i - 7]
+            with target_col:
+                is_selected = (st.session_state.blog_photo_count == val)
+                if st.button(str(val), key=f"photo_{val}", use_container_width=True):
+                    st.session_state.blog_photo_count = val
+                    st.rerun()
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
