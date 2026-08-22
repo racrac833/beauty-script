@@ -41,7 +41,7 @@ if "blog_photo_count" not in st.session_state:
 
 generate_action = False
 
-# ==================== [2. 테마 컬러 완벽 동기화] ====================
+# ==================== [2. 테마 컬러 및 완벽 고정 크기 HTML/CSS 선택 바] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
@@ -239,13 +239,46 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 선택형 숫자 버튼 크기 및 스타일 완벽 통일화 */
-    section[data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] button {{
-        height: 38px !important;
-        border-radius: 8px !important;
-        font-weight: 800 !important;
-        font-size: 13px !important;
-        transition: all 0.1s ease-in-out !important;
+    /* 6. [핵심] 숫자 박스 크기 100% 동일 고정 및 흔들림 방지 그리드 */
+    .number-grid {{
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        margin-bottom: 15px;
+        width: 100%;
+    }}
+    .number-grid-blog {{
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        margin-bottom: 15px;
+        width: 100%;
+    }}
+    .num-box {{
+        background: #22252b;
+        border: 1.5px solid #3d424b;
+        border-radius: 8px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b0b5c1;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.1s ease-in-out;
+        user-select: none;
+        text-decoration: none;
+    }}
+    .num-box:hover {{
+        border-color: {active_color};
+        color: #ffffff;
+    }}
+    .num-box.active {{
+        background: {theme_bg} !important;
+        color: #ffffff !important;
+        border: 2px solid #ffffff !important;
+        box-shadow: {'0 0 10px rgba(220, 39, 67, 0.5)' if is_insta else '0 0 10px rgba(3, 199, 90, 0.5)'};
     }}
 
     /* 7. 결과창 헤더 뱃지 */
@@ -514,7 +547,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # ==================== [완벽히 테마 컬러가 적용되는 균등 버튼 셀렉터] ====================
+    # ==================== [크기 100% 동일 & 위치 고정 균등 그리드 선택기] ====================
     if is_insta:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
@@ -523,25 +556,34 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
         
+        # 쿼리스트링 대신 Streamlit 버튼 클릭으로 상태를 갱신하는 깔끔한 Grid 구현
         cols = st.columns(7)
         for i, val in enumerate(range(6, 13)):
             with cols[i]:
                 is_selected = (st.session_state.insta_scene_count == val)
-                btn_label = f"🔥 {val}" if is_selected else str(val)
-                
-                # 선택된 버튼은 인스타 그라데이션 적용 스타일 명시
                 if is_selected:
                     st.markdown(f"""
                     <style>
-                        div.stButton > button[key="insta_btn_{val}"] {{
+                        div.stButton > button[key="insta_box_{val}"] {{
                             background: {insta_gradient} !important;
                             color: white !important;
                             border: 2px solid #ffffff !important;
+                            font-weight: 900 !important;
+                        }}
+                    </style>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <style>
+                        div.stButton > button[key="insta_box_{val}"] {{
+                            background: #22252b !important;
+                            color: #b0b5c1 !important;
+                            border: 1px solid #3d424b !important;
                         }}
                     </style>
                     """, unsafe_allow_html=True)
 
-                if st.button(str(val), key=f"insta_btn_{val}", use_container_width=True):
+                if st.button(str(val), key=f"insta_box_{val}", use_container_width=True):
                     st.session_state.insta_scene_count = val
                     st.rerun()
     else:
@@ -563,15 +605,26 @@ with st.sidebar:
                 if is_selected:
                     st.markdown(f"""
                     <style>
-                        div.stButton > button[key="blog_btn_{val}"] {{
+                        div.stButton > button[key="blog_box_{val}"] {{
                             background: {naver_green} !important;
                             color: white !important;
                             border: 2px solid #ffffff !important;
+                            font-weight: 900 !important;
+                        }}
+                    </style>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <style>
+                        div.stButton > button[key="blog_box_{val}"] {{
+                            background: #22252b !important;
+                            color: #b0b5c1 !important;
+                            border: 1px solid #3d424b !important;
                         }}
                     </style>
                     """, unsafe_allow_html=True)
 
-                if st.button(str(val), key=f"blog_btn_{val}", use_container_width=True):
+                if st.button(str(val), key=f"blog_box_{val}", use_container_width=True):
                     st.session_state.blog_photo_count = val
                     st.rerun()
 
