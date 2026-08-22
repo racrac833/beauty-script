@@ -235,7 +235,44 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
+    /* 6. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
+    .result-header-wrapper {{
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+        margin-bottom: 14px;
+    }}
+    .result-main-title {{
+        font-size: 22px;
+        font-weight: 900;
+        color: #ffffff;
+        letter-spacing: 0.5px;
+    }}
+    .result-config-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid {'#ff4b72' if is_insta else '#00ff6f'};
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        box-shadow: {'0 2px 10px rgba(220, 39, 67, 0.35)' if is_insta else '0 2px 10px rgba(3, 199, 90, 0.35)'};
+    }}
+    .result-config-badge span.dot {{
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: {current_theme_color};
+        display: inline-block;
+    }}
+
+    /* 7. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -293,14 +330,6 @@ st.markdown(f"""
         fill: #ffffff !important;
         width: 24px !important;
         height: 24px !important;
-    }}
-    .result-clean-header {{
-        font-size: 22px;
-        font-weight: 900;
-        color: #ffffff;
-        margin-top: 15px;
-        margin-bottom: 12px;
-        letter-spacing: 0.5px;
     }}
     .empty-result-box {{
         background: #1e2025;
@@ -760,16 +789,26 @@ if generate_action:
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [결과 화면: 독립 분리 및 대형 복사 아이콘 지원] ====================
+# ==================== [결과 화면: 눈에 띄는 설정값 뱃지 UI] ====================
 current_result = st.session_state.insta_result if is_insta else st.session_state.blog_result
-label_type = f"인스타그램 대본 ({st.session_state.product_category} / 장면 {st.session_state.insta_scene_count}개)" if is_insta else f"블로그 원고 ({st.session_state.product_category} / 사진 {st.session_state.blog_photo_count}장)"
+main_title = "인스타그램 대본" if is_insta else "블로그 원고"
+config_info = f"{st.session_state.product_category} · 장면 {st.session_state.insta_scene_count}개" if is_insta else f"{st.session_state.product_category} · 사진 {st.session_state.blog_photo_count}장"
 
-st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
+# 눈에 띄는 설정값 뱃지 렌더링
+st.markdown(f"""
+<div class="result-header-wrapper">
+    <span class="result-main-title">{main_title}</span>
+    <span class="result-config-badge">
+        <span class="dot"></span>
+        {config_info}
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
 if current_result:
     st.code(current_result, language="markdown")
 else:
     st.markdown(
-        f'<div class="empty-result-box">아직 생성된 {label_type}가 없습니다.<br>상단 중앙의 <b>하트(❤️) 버튼</b>을 누르면 생성이 시작됩니다.</div>', 
+        f'<div class="empty-result-box">아직 생성된 {main_title}가 없습니다.<br>상단 중앙의 <b>하트(❤️) 버튼</b>을 누르면 생성이 시작됩니다.</div>', 
         unsafe_allow_html=True
     )
