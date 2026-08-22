@@ -31,7 +31,10 @@ if "content_mode" not in st.session_state:
 
 is_insta = (st.session_state.content_mode == "instagram")
 
-# 강력한 다크모드 대응 인라인 CSS (중앙 로고 + 강제 색상 주입)
+# 강력한 다크모드 대응 딥 CSS (Streamlit 내부 텍스트 태그까지 100% 강제 색상 적용)
+insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
+naver_green = "#03C75A"
+
 st.markdown(f"""
 <style>
     /* 1. 중앙 정렬 RAMILOVE 타이틀 */
@@ -41,43 +44,42 @@ st.markdown(f"""
         font-weight: 900 !important;
         color: #FFFFFF !important;
         letter-spacing: 2px !important;
-        margin-top: 10px !important;
-        margin-bottom: 30px !important;
+        margin-top: 5px !important;
+        margin-bottom: 25px !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 탭 버튼 (좌: 인스타그램 / 우: 블로그) */
-    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(1) button {{
-        background: {'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' if is_insta else '#1e2124'} !important;
+    /* 2. 상단 탭 1번 (인스타그램) */
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:first-child button {{
+        background: {insta_gradient if is_insta else '#1e2124'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #30363d'} !important;
+        border-radius: 30px !important;
+        height: 52px !important;
+        box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
+    }}
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:first-child button * {{
         color: {'#ffffff' if is_insta else '#8b949e'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
-        height: 52px !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #30363d'} !important;
-        border-radius: 30px !important;
-        box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
 
-    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:nth-of-type(2) button {{
-        background: {'#03C75A' if not is_insta else '#1e2124'} !important;
+    /* 2. 상단 탭 2번 (블로그) */
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:last-child button {{
+        background: {naver_green if not is_insta else '#1e2124'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #30363d'} !important;
+        border-radius: 30px !important;
+        height: 52px !important;
+        box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
+    }}
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"]:last-child button * {{
         color: {'#ffffff' if not is_insta else '#8b949e'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
-        height: 52px !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #30363d'} !important;
-        border-radius: 30px !important;
-        box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
 
-    /* 3. 중앙 슬림 원형 생성하기 버튼 강제 색상 & 디자인 */
+    /* 3. 중앙 슬림 원형 생성 버튼 */
     div[data-testid="stMainBlockContainer"] div[data-testid="stHorizontalBlock"]:last-of-type div[data-testid="column"]:nth-of-type(2) button {{
-        background: {
-            "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" 
-            if is_insta else "#03C75A"
-        } !important;
-        color: #ffffff !important;
-        font-size: 19px !important;
-        font-weight: 900 !important;
+        background: {insta_gradient if is_insta else naver_green} !important;
         border: none !important;
         border-radius: 50px !important;
         height: 56px !important;
@@ -86,6 +88,11 @@ st.markdown(f"""
             if is_insta else "0 6px 20px rgba(3, 199, 90, 0.6)"
         } !important;
         transition: all 0.2s ease-in-out !important;
+    }}
+    div[data-testid="stMainBlockContainer"] div[data-testid="stHorizontalBlock"]:last-of-type div[data-testid="column"]:nth-of-type(2) button * {{
+        color: #ffffff !important;
+        font-size: 19px !important;
+        font-weight: 900 !important;
     }}
 
     div[data-testid="stMainBlockContainer"] div[data-testid="stHorizontalBlock"]:last-of-type div[data-testid="column"]:nth-of-type(2) button:hover {{
@@ -490,6 +497,10 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
