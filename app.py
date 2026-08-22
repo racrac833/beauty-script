@@ -206,6 +206,44 @@ st.markdown(f"""
         font-weight: 900;
         box-shadow: {'0 2px 8px rgba(220, 39, 67, 0.5)' if is_insta else '0 2px 8px rgba(3, 199, 90, 0.5)'};
     }}
+
+    /* 5. 결과창 복사 버튼 강조 스타일 */
+    .stCodeBlock {{
+        position: relative !important;
+        border-radius: 14px !important;
+        border: 1px solid #3d424b !important;
+        background: #1e2025 !important;
+    }}
+    .stCodeBlock button[title="Copy to clipboard"], 
+    .stCodeBlock button[aria-label="Copy to clipboard"],
+    .stCodeBlock button {{
+        background: {current_theme_color} !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        opacity: 0.95 !important;
+        box-shadow: {'0 3px 12px rgba(220, 39, 67, 0.6)' if is_insta else '0 3px 12px rgba(3, 199, 90, 0.6)'} !important;
+        transition: all 0.2s ease-in-out !important;
+    }}
+    .stCodeBlock button:hover {{
+        transform: scale(1.1) !important;
+        opacity: 1 !important;
+        box-shadow: {'0 4px 18px rgba(220, 39, 67, 0.9)' if is_insta else '0 4px 18px rgba(3, 199, 90, 0.9)'} !important;
+    }}
+    .stCodeBlock button svg {{
+        fill: #ffffff !important;
+        width: 18px !important;
+        height: 18px !important;
+    }}
+    .result-clean-header {{
+        font-size: 22px;
+        font-weight: 900;
+        color: #ffffff;
+        margin-top: 15px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -673,10 +711,10 @@ if generate_action:
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [결과 화면: 100% 원클릭 복사 뷰어 & 렌더링] ====================
+# ==================== [결과 화면: 깔끔한 텍스트 헤더 + 눈에 띄는 복사 버튼] ====================
 if st.session_state.generated_result:
     label_type = "인스타그램 대본" if is_insta else "블로그 원고"
     
-    st.markdown(f"### 📋 {label_type} (우측 상단 복사 아이콘 클릭 시 원본 그대로 복사)")
-    # Streamlit 공식 내장 복사 코드 블록 (줄바꿈/띄어쓰기 100% 보존 복사)
+    st.markdown(f'<div class="result-clean-header">{label_type}</div>', unsafe_allow_html=True)
+    # Streamlit 내장 코드 블록 (우측 상단 복사 버튼 테마 컬러 및 호버 효과 적용)
     st.code(st.session_state.generated_result, language="markdown")
