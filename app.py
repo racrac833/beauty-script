@@ -51,33 +51,33 @@ st.html(f"""
 
     /* 2. 상단 탭: 인스타그램 */
     .st-key-tab_insta button {{
-        background: {insta_gradient if is_insta else '#1e2124'} !important;
-        border: {'2px solid #ff4b72' if is_insta else '1px solid #30363d'} !important;
+        background: {insta_gradient if is_insta else '#999999'} !important;
+        border: {'2px solid #ff4b72' if is_insta else '1px solid #777777'} !important;
         border-radius: 30px !important;
         height: 52px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
-    .st-key-tab_insta button p, .st-key-tab_insta button span {{
-        color: {'#ffffff' if is_insta else '#8b949e'} !important;
+    .st-key-tab_insta button * {{
+        color: {'#ffffff' if is_insta else '#111111'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
     }}
 
     /* 2. 상단 탭: 블로그 */
     .st-key-tab_blog button {{
-        background: {naver_green if not is_insta else '#1e2124'} !important;
-        border: {'2px solid #00ff6f' if not is_insta else '1px solid #30363d'} !important;
+        background: {naver_green if not is_insta else '#999999'} !important;
+        border: {'2px solid #00ff6f' if not is_insta else '1px solid #777777'} !important;
         border-radius: 30px !important;
         height: 52px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
-    .st-key-tab_blog button p, .st-key-tab_blog button span {{
-        color: {'#ffffff' if not is_insta else '#8b949e'} !important;
+    .st-key-tab_blog button * {{
+        color: {'#ffffff' if not is_insta else '#111111'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 40% 슬림화, 화이트 바탕, 블랙 텍스트, 좌측 미니 컬러 원 */
+    /* 3. 하단 중앙 슬림 생성 버튼 (화이트 바탕, 블랙 텍스트, 단일 원) */
     .st-key-btn_generate_main button {{
         background: #FFFFFF !important;
         border: 1px solid #E0E0E0 !important;
@@ -85,20 +85,19 @@ st.html(f"""
         height: 52px !important;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
         transition: all 0.2s ease-in-out !important;
-        position: relative !important;
-        padding-left: 20px !important;
-    }}
-    .st-key-btn_generate_main button p, .st-key-btn_generate_main button span {{
-        color: #111111 !important;
-        font-size: 16px !important;
-        font-weight: 800 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }}
     
-    /* 버튼 내부 좌측 미니 컬러 서클 */
-    .st-key-btn_generate_main button p::before, .st-key-btn_generate_main button span::before {{
+    .st-key-btn_generate_main button * {{
+        color: #111111 !important;
+        font-size: 16px !important;
+        font-weight: 800 !important;
+    }}
+    
+    /* 최상위 button 요소에만 단 1개의 가상 원 생성 */
+    .st-key-btn_generate_main button::before {{
         content: "" !important;
         display: inline-block !important;
         width: 12px !important;
@@ -270,8 +269,7 @@ with tab_col2:
 
 st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 슬림(40% 축소) 원형 생성 버튼] ====================
-# [1.8, 2.0, 1.8] 비율로 배치하여 버튼 좌우 폭을 약 40% 슬림하게 조절
+# ==================== [중앙 정렬 슬림 원형 생성 버튼] ====================
 b_col1, b_col2, b_col3 = st.columns([1.8, 2.0, 1.8])
 
 with b_col2:
