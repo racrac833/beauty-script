@@ -233,13 +233,15 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 6. 결과창 코드 블록 자동 줄바꿈 & 가로스크롤 완전 방지 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
         border: 1px solid #3d424b !important;
         background: #1e2025 !important;
         overflow-x: hidden !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }}
     .stCodeBlock pre {{
         white-space: pre-wrap !important;
@@ -247,6 +249,8 @@ st.markdown(f"""
         overflow-wrap: break-word !important;
         overflow-x: hidden !important;
         padding-right: 55px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
     }}
     .stCodeBlock code {{
         white-space: pre-wrap !important;
@@ -255,6 +259,8 @@ st.markdown(f"""
         line-height: 1.7 !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         font-size: 15px !important;
+        display: block !important;
+        width: 100% !important;
     }}
     .stCodeBlock button[title="Copy to clipboard"], 
     .stCodeBlock button[aria-label="Copy to clipboard"],
@@ -442,7 +448,6 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
-    # 카테고리 & 블로그 사진 장수 슬라이더 추가
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     cat_index = categories.index(st.session_state.product_category) if st.session_state.product_category in categories else 0
     product_category = st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, index=cat_index)
@@ -509,8 +514,7 @@ if generate_action:
 [핵심 절대 원칙 (CRITICAL)]
 
 1. [가로 스크롤 방지 줄바꿈 원칙 (STRICT)]:
-- 한 줄이 가로로 길게 늘어지면 절대 안 됩니다.
-- 썸네일 설명, 씬별 연출 설명, 나레이션 문장, #광고 캡션, 하단 나레이션 모음 등 대본의 모든 텍스트는 1줄당 20~35자 내외(호흡 단위)로 자연스럽게 엔터(줄바꿈)를 쳐서 산뜻하게 작성하세요.
+- 대본의 모든 텍스트(설명, 나레이션, 캡션)는 1줄당 20~30자 내외로 자연스럽게 엔터(줄바꿈)를 쳐서 가로로 길어지지 않게 작성하세요.
 
 2. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN - 법적 심의)]:
 - '시술', '시술급', '시술받은 것처럼', '피부과 시술', '보톡스', '필러', '리쥬란', '레이저', '주사' 등 모든 의학적/피부과 시술 단어 및 시술과 비교/유사성을 암시하는 표현을 일체 사용하지 마세요.
@@ -518,8 +522,7 @@ if generate_action:
 
 3. [종결 어미 스타일 엄수]:
 - '~했다', '~해봤다', '~붙여봤다' 등 딱딱하게 끝나는 종결형 어미를 절대 쓰지 마세요.
-- 부드러운 연결형이나 솔직한 구어체로 표현하세요.
-  (예: 한쪽에만 붙여봤다 ➔ 한쪽에만 붙여보고 / 발라보았다 ➔ 슥 발라봤는데 / 사용했다 ➔ 직접 써보니까 / 놀라웠다 ➔ 감탄 나오더라고요)
+- 부드러운 연결형이나 솔직한 구어체로 표현하세요 (~해보고, ~발라봤는데, ~직접 써보니까 등).
 
 4. [썸네일 필수 구성 (베스트 1종 + 추천 5선)]:
 - 최상단에 썸네일 비주얼 연출 컷 설명, [베스트 썸네일], 그리고 [추천 썸네일 문구 5선](1~5번)을 반드시 별도로 전부 작성합니다.
@@ -540,11 +543,11 @@ if generate_action:
 - 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
 - 필수 해시태그('{essential_tags}') 및 행사 정보('{event_info}')를 완벽히 반영합니다.
 
-[출력 양식 템플릿 - 아래 형태 및 줄바꿈을 100% 준수하여 출력할 것]
+[출력 양식 템플릿]
 
 썸네일
 썸네일(비주얼 연출 컷 설명) : (영상의 핵심 후킹을 담은 직관적인 비주얼 연출 묘사 /
-20~35자 단위로 적절히 줄바꿈)
+20~30자 단위로 적절히 줄바꿈)
 
 [베스트 썸네일]
 (첫째 줄: 띄어쓰기 포함, 공백 제외 10자 이내)
@@ -682,7 +685,7 @@ if generate_action:
 (30대 여성 찐후기 톤: 리얼 후킹 문구)
 
 (솔직 사용 경험 및 핵심 장점 설명 /
-한 줄로 길게 늘어지지 않게 20~35자마다
+한 줄로 길게 늘어지지 않게 20~30자마다
 자연스럽게 엔터로 줄바꿈하여 작성)
 
 (기획전/특가 일정, 할인 가격, 구매처 안내 포함)
@@ -714,7 +717,7 @@ if generate_action:
 공백 포함 450~550자 내외)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [가로 스크롤 방지 20~35자 줄바꿈], [시술명/시술비교 절대 금지], [베스트 썸네일 + 추천 5선], 부드러운 구어체 어미(~했다 금지)를 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿과 [가로 스크롤 방지 20~30자 줄바꿈], [시술명/시술비교 절대 금지], [베스트 썸네일 + 추천 5선], 부드러운 구어체 어미(~했다 금지)를 100% 동일하게 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 카테고리: {product_category}
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
@@ -757,19 +760,20 @@ if generate_action:
 
 [핵심 절대 원칙 (CRITICAL)]
 
-1. [사진 장수 정확히 {blog_photo_count}장 구성 (STRICT)]:
+1. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT - 가로 스크롤 절대 방지)]:
+- (촬영 가이드: ...) 설명이 한 줄로 길게 늘어지면 가로 스크롤이 생기므로, 반드시 촬영 가이드 텍스트도 20~30자 내외마다 엔터(줄바꿈)를 쳐서 2~3줄로 나누어 작성하세요.
+- 본문 [원고 텍스트] 역시 1줄당 25~35자 내외로 자연스럽게 엔터를 쳐서 작성하세요.
+
+2. [사진 장수 정확히 {blog_photo_count}장 구성 (STRICT)]:
 - 사용자가 설정한 [사진 1]부터 [사진 {blog_photo_count}]까지 정확히 {blog_photo_count}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
 - 각 사진마다 '{product_category}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
 
-2. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
+3. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
 - [브랜드명 + 핵심 키워드 + 제품군]을 앞단(15자 이내)에 배치한 제목 5선을 추천합니다.
 
-3. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN)]:
+4. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN)]:
 - '시술', '시술급', '시술받은 것처럼', '보톡스', '필러', '리쥬란', '레이저' 등 모든 시술명 및 비교 표현 절대 금지.
 - 순수 홈케어 사용감과 만족도 위주로 기술하세요.
-
-4. [가독성 극대화 줄바꿈 원칙]:
-- 각 사진 아래 원고는 1~2문장(30~50자 내외)마다 엔터(줄바꿈)를 적용하여 가로 스크롤 없이 모바일에서 술술 읽히도록 작성하세요.
 
 5. [종결 어미 스타일 엄수]:
 - '~했다', '~해봤다' 등 딱딱한 어미 대신 부드러운 30대 여성 찐후기 어조(~해보고, ~발라봤는데, ~직접 써보니까 등)를 유지하세요.
@@ -781,21 +785,24 @@ if generate_action:
 [출력 양식 템플릿]
 
 [네이버 블로그 추천 제목 5선 (SEO 최적 글자수 25~35자)]
-1. (브랜드명+키워드 전면 배치 / 25~35자 제목)
-2. (브랜드명+키워드 전면 배치 / 25~35자 제목)
-3. (브랜드명+키워드 전면 배치 / 25~35자 제목)
-4. (브랜드명+키워드 전면 배치 / 25~35자 제목)
-5. (브랜드명+키워드 전면 배치 / 25~35자 제목)
+1. (브랜드명+키워드 전면 배치 제목)
+2. (브랜드명+키워드 전면 배치 제목)
+3. (브랜드명+키워드 전면 배치 제목)
+4. (브랜드명+키워드 전면 배치 제목)
+5. (브랜드명+키워드 전면 배치 제목)
 
 -------------------------------------------------------
 
 [사진 1] 부터 [사진 {blog_photo_count}] 까지 순서대로:
 
 [사진 번호]
-(촬영 가이드: {product_category} 특성에 맞춘 구체적인 촬영 연출 가이드)
+(촬영 가이드: {product_category} 특성에 맞춘 촬영 가이드 /
+한 줄로 길어지지 않게 20~30자마다
+자연스럽게 엔터로 줄바꿈)
 
 [원고 텍스트]
-(1~2문장 단위로 줄바꿈을 적용한 자연스러운 30대 찐후기 텍스트)
+(1~2문장 단위로 줄바꿈을 적용한 30대 찐후기 텍스트 /
+가로로 길어지지 않게 25~35자마다 엔터 적용)
 
 -------------------------------------------------------
 
@@ -803,7 +810,7 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {product_category}], [사진 장수: 정확히 {blog_photo_count}장], [SEO 25~35자 제목], [시술명 금지], [가독성 줄바꿈], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
+다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {product_category}], [사진 장수: 정확히 {blog_photo_count}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 카테고리: {product_category}
 - 사진 장수: {blog_photo_count}장
 - 브랜드명: {brand_name}
