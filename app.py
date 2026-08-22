@@ -79,17 +79,17 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: 정원형(Circle) + 하트 아이콘 */
+    /* 3. 하단 중앙 생성 버튼: 70% 축소 (98px 정원형), 5px 외곽선 + 하트 아이콘 */
     .st-key-btn_generate_main button {{
-        width: 140px !important;
-        height: 140px !important;
+        width: 98px !important;
+        height: 98px !important;
         border-radius: 50% !important;
         background: #FFFFFF !important;
-        border: {'7px solid transparent' if is_insta else f'7px solid {naver_green}'} !important;
+        border: {'5px solid transparent' if is_insta else f'5px solid {naver_green}'} !important;
         {'background-image: linear-gradient(#FFFFFF, #FFFFFF), ' + insta_gradient + ' !important; background-origin: border-box !important; background-clip: padding-box, border-box !important;' if is_insta else ''}
         box-shadow: {
-            "0 0 20px rgba(220, 39, 67, 0.5)" 
-            if is_insta else "0 0 20px rgba(3, 199, 90, 0.5)"
+            "0 0 15px rgba(220, 39, 67, 0.5)" 
+            if is_insta else "0 0 15px rgba(3, 199, 90, 0.5)"
         } !important;
         transition: all 0.25s ease-in-out !important;
         margin: 0 auto !important;
@@ -101,7 +101,7 @@ st.html(f"""
 
     .st-key-btn_generate_main button * {{
         color: {'#dc2743' if is_insta else '#03C75A'} !important;
-        font-size: 42px !important;
+        font-size: 30px !important;
         line-height: 1 !important;
         display: flex !important;
         align-items: center !important;
@@ -111,8 +111,8 @@ st.html(f"""
     .st-key-btn_generate_main button:hover {{
         transform: scale(1.08) !important;
         box-shadow: {
-            "0 0 30px rgba(220, 39, 67, 0.8)" 
-            if is_insta else "0 0 30px rgba(3, 199, 90, 0.8)"
+            "0 0 25px rgba(220, 39, 67, 0.8)" 
+            if is_insta else "0 0 25px rgba(3, 199, 90, 0.8)"
         } !important;
     }}
 </style>
@@ -254,7 +254,6 @@ def get_url_context():
     return url_context
 
 # ==================== [상단 채널 선택 탭 2개: 좌우 60% 슬림 중앙 정렬] ====================
-# [20%, 30%, 30%, 20%] 구조로 중앙 60% 영역에 배치
 pad_left, tab_col1, tab_col2, pad_right = st.columns([0.2, 0.3, 0.3, 0.2])
 
 with tab_col1:
@@ -269,8 +268,8 @@ with tab_col2:
 
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-# ==================== [중앙 정렬 하트 아이콘 원형 생성 버튼] ====================
-b_col1, b_col2, b_col3 = st.columns([1.6, 0.8, 1.6])
+# ==================== [중앙 정렬 70% 축소 하트 아이콘 원형 생성 버튼] ====================
+b_col1, b_col2, b_col3 = st.columns([1.8, 0.4, 1.8])
 
 with b_col2:
     generate_action = st.button("❤️", use_container_width=True, key="btn_generate_main")
