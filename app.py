@@ -11,8 +11,8 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-st.set_page_config(page_title="뷰티 릴스 대본 작성기", layout="wide")
-st.title("🎬 뷰티 숏폼 릴스 대본 생성기")
+st.set_page_config(page_title="뷰티 콘텐츠 생성기 (릴스 & 블로그)", layout="wide")
+st.title("✨ 뷰티 숏폼 릴스 & 네이버 블로그 원고 생성기")
 
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
@@ -147,71 +147,51 @@ with st.sidebar:
     target_audience = st.text_input("타겟층", value=st.session_state.target_audience)
     essential_tags = st.text_input("필수 해시태그", value=st.session_state.essential_tags)
     account_tags = st.text_input("공식 계정 태그", value=st.session_state.account_tags)
-    
-    st.markdown("---")
-    generate_btn = st.button("🎬 최종 대본 생성하기", type="primary", use_container_width=True)
 
-if generate_btn:
-    if not brand_name or not product_usp:
-        st.warning("브랜드명과 제품 USP를 확인해주세요.")
-    else:
-        with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 대본을 작성 중입니다..."):
-            url_context = ""
-            if guideline_url.strip():
-                g_text = fetch_url_content(guideline_url.strip())
-                if g_text:
-                    url_context += f"\n[가이드라인 링크 내용]: {g_text}\n"
-            if product_url.strip():
-                p_text = fetch_url_content(product_url.strip())
-                if p_text:
-                    url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
+# 탭 구성 (릴스 대본 / 네이버 블로그 원고)
+tab1, tab2 = st.tabs(["🎬 숏폼 릴스 대본 생성", "📝 네이버 블로그 원고 생성"])
 
-            system_instruction = f"""
+# 공통 URL 컨텍스트 준비 함수
+def get_url_context():
+    url_context = ""
+    if guideline_url.strip():
+        g_text = fetch_url_content(guideline_url.strip())
+        if g_text:
+            url_context += f"\n[가이드라인 링크 내용]: {g_text}\n"
+    if product_url.strip():
+        p_text = fetch_url_content(product_url.strip())
+        if p_text:
+            url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
+    return url_context
+
+# ==================== [TAB 1: 숏폼 릴스 대본] ====================
+with tab1:
+    st.subheader("🎬 숏폼(릴스/쇼츠) 전문 촬영 콘티")
+    if st.button("🎬 릴스 대본 생성하기", type="primary", use_container_width=True, key="btn_reels"):
+        if not brand_name or not product_usp:
+            st.warning("사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
+        else:
+            with st.spinner("전문 콘티 작가가 젬스 표준 양식으로 릴스 대본을 작성 중입니다..."):
+                url_context = get_url_context()
+
+                system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
 사용자가 제공하는 [가이드라인 이미지/텍스트, 제품 상세페이지 내용, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안]을 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
 
 [핵심 절대 원칙 (CRITICAL)]
+1. [브랜드명 왜곡 절대 금지]: 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
+2. [해시태그 임의 추가 금지]: 가이드에 지정된 필수 해시태그('{essential_tags}') 외에는 임의 추천 태그를 추가하지 않습니다.
+3. [행사 정보 100% 반영]: '{event_info}'에 포함된 정확한 프로모션 일정, 할인 가격, 구매처를 대본 4번 장면과 캡션에 명시합니다.
+4. [톤앤매너]: 30대 여성이 솔직하게 공유하는 자연스럽고 친근한 찐후기 구어체로 작성합니다.
+5. [장면 넘버링 및 가독성]: [1. 장면], [2. 장면] 순차 넘버링을 적용하고 장면 사이 빈 줄을 유지합니다.
+6. [자막 표기 규칙]: 자막에 특수문자/이모티콘/느낌표 금지, 줄바꿈 시 단독 줄로 / 배치, 각주는 (하단 각주 삽입)과 * 표시, 비포애프터는 단독 줄로 표기합니다.
+7. [썸네일 규칙]: 2줄 작성, 첫줄 공백제외 10자 이내, 둘째줄 공백제외 12자 이내 엄수.
+8. [나레이션 분량 엄수]: 전체 나레이션 총합 분량은 공백 포함 280자 ~ 300자 내외로 타이트하게 작성합니다.
 
-1. [브랜드명 및 고유 명칭 왜곡 절대 금지 (STRICT)]:
-- 브랜드명은 반드시 사용자가 제공한 '{brand_name}' 그대로 단 1글자의 변형, 축약, 오역, 번역, 띄어쓰기 변경 없이 100% 동일하게만 사용합니다.
-- 제품명, 라인명, 규격/중량, 소재, 디자인 등 구체적 수치와 명칭 역시 원형 그대로 유지합니다.
-
-2. [해시태그 임의 생성/추가 절대 금지 (STRICT)]:
-- 가이드라인에 지정된 필수 해시태그('{essential_tags}') 외에는 단 1개의 연관/추천/일반 해시태그도 임의로 추가하지 않습니다.
-- 제공된 필수 해시태그가 없을 경우, 해시태그 항목은 완전히 비워둡니다.
-
-3. [모든 제품, 구성품 및 행사 정보 100% 반영]:
-- 가이드의 행사 정보('{event_info}')에 포함된 정확한 프로모션 일정(예: 8월 1일~8월 29일), 할인 가격, 구매처(올리브영/프로필 링크 등)를 대본의 마지막 장면 및 캡션에 반드시 명시합니다.
-
-4. [과대광고 심의 준수]:
-- 의학적·치료적 효능을 단정 짓지 않고, 가이드에 명시된 올바른 사용법, 사용 편의성, 실제 체감 위주로 작성합니다.
-
-5. [톤앤매너 - 30대 여성 찐후기 스타일]:
-- 캡션과 나레이션은 작위적인 광고 문구를 지양하고, 30대 여성이 실제로 사용해보고 솔직하게 공유하는 자연스럽고 친근한 리얼 후기 어투로 작성합니다.
-
-6. [장면 넘버링 및 가독성 포맷 엄수]:
-- 메인 스크립트의 각 씬 헤더는 반드시 [1. 장면], [2. 장면], [3. 장면], [4. 장면] 형태로 작성합니다.
-- 각 장면 사이에는 반드시 빈 줄을 두어 워드에 붙여넣어도 간격이 유지되도록 합니다.
-- 하단 '장면 요약' 섹션 역시 장면： (연출 요약) 형태로 순서대로 나열합니다.
-
-7. [자막 표기 및 특수 규칙 엄수]:
-- 자막에는 이모티콘, 아이콘, 느낌표(!) 등 특수문자를 절대 사용하지 않습니다.
-- 자막 줄바꿈 표기 시 한 줄에 /를 쓰지 않고, 반드시 줄바꿈하여 단독 줄로 /를 배치합니다.
-- [비포&애프터 표기]: 비포/애프터 장면이 포함된 씬에서는 자막 영역에 반드시 독립된 줄로 '비포 애프터' 문구를 추가합니다.
-- [각주 필수 삽입]: 각주 내용이 있을 경우, 해당 자막 바로 하단에 (하단 각주 삽입) 표시와 함께 '*각주 원문 내용'을 명시합니다.
-
-8. [썸네일 규칙]:
-- 썸네일 카피는 2줄로 작성하며, 첫째 줄은 공백 제외 최대 10자 이내, 둘째 줄은 공백 제외 최대 12자 이내로 엄격히 제한하고 올바른 띄어쓰기를 적용합니다.
-
-9. [나레이션 분량 엄수]:
-- 전체 나레이션 총합 분량은 공백 포함 280자 ~ 300자 내외로 타이트하게 작성합니다.
-- 마지막 '나레이션만 정리' 섹션에 전체 나레이션을 한 번에 모아서 출력합니다.
-
-[출력 양식 템플릿 - 아래 형태를 100% 준수하여 출력할 것]
-
+[출력 양식 템플릿]
 썸네일
-썸네일(비주얼 연출 컷 설명) : (영상의 핵심 후킹을 담은 직관적인 비주얼 연출 묘사)
+썸네일(비주얼 연출 컷 설명) : (비주얼 연출 묘사)
 
 (베스트 썸네일 첫줄: 띄어쓰기 포함, 공백 제외 10자 이내)
 (베스트 썸네일 둘째줄: 띄어쓰기 포함, 공백 제외 12자 이내)
@@ -294,9 +274,9 @@ if generate_btn:
 나레이션만 정리
 (1~4번 씬의 전체 나레이션 전문을 모아서 줄바꿈하여 출력 / 공백 포함 280~300자)
 """
-            prompt_text = f"""
-다음 정보와 상세페이지 자료를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 뷰티 숏폼 대본을 작성해줘:
-- 정확한 브랜드명: {brand_name}
+                prompt_text = f"""
+다음 정보를 바탕으로 위 템플릿과 규칙을 100% 동일하게 지켜 뷰티 숏폼 대본을 작성해줘:
+- 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
@@ -305,26 +285,146 @@ if generate_btn:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
-            contents = []
-            if uploaded_images:
-                for uploaded_file in uploaded_images:
-                    contents.append(Image.open(uploaded_file))
-            
-            contents.append(prompt_text)
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
+                contents.append(prompt_text)
 
-            try:
-                response = client.models.generate_content(
-                    model="gemini-3.6-flash",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=0.4,
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-3.6-flash",
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_instruction_reels,
+                            temperature=0.4,
+                        )
                     )
-                )
-                
-                st.success("대본이 성공적으로 완성되었습니다!")
-                st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
-                st.markdown("---")
-                st.markdown(response.text)
-            except Exception as e:
-                st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
+                    st.success("🎬 릴스 대본이 성공적으로 완성되었습니다!")
+                    st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
+                    st.markdown("---")
+                    st.markdown(response.text)
+                except Exception as e:
+                    st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
+
+# ==================== [TAB 2: 네이버 블로그 원고] ====================
+with tab2:
+    st.subheader("📝 네이버 블로그 포스팅 원고 (SEO 최적화)")
+    if st.button("📝 블로그 원고 생성하기", type="primary", use_container_width=True, key="btn_blog"):
+        if not brand_name or not product_usp:
+            st.warning("사이드바에서 브랜드명과 제품 USP를 먼저 확인해주세요.")
+        else:
+            with st.spinner("네이버 뷰티 인플루언서 스타일로 SEO 최적화 블로그 원고를 작성 중입니다..."):
+                url_context = get_url_context()
+
+                system_instruction_blog = f"""
+[Role & Goal]
+당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
+사용자가 제공한 [가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘(C-Rank, D.I.A.)과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
+
+[핵심 절대 원칙 (CRITICAL)]
+1. [브랜드명 및 고유명칭 원형 유지]: 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
+2. [네이버 SEO 최적화 제목]:
+   - 메인 키워드(브랜드명 + 제품군 + 핵심 고민/특징)가 앞단에 포함된 매력적인 제목 5선을 상단에 추천합니다.
+3. [블로그 전용 구성]:
+   - '자막', '#광고 캡션', '나레이션만 정리' 등 숏폼 전용 섹션은 일체 생성하지 않습니다.
+   - 각 문단 흐름마다 [사진 1], [사진 2], [사진 3]... 순서대로 어떤 사진을 찍어 올려야 하는지 구체적인 [촬영 가이드]를 명시합니다.
+   - 각 사진 아래에는 30대 여성 찐후기 톤의 자연스럽고 상세한 [원고 텍스트]를 작성합니다.
+4. [체계적인 흐름 (체류시간 극대화)]:
+   - 도입부: 일상 피부 고민 공감 및 제품을 접하게 된 계기 (후킹)
+   - 패키지 및 성분 분석: 제품 외관, 토출구(팁/용기), 주요 성분 및 USP 소개
+   - 제형 및 발림성: 텍스처, 끈적임 여부, 흡수력 디테일 묘사
+   - 실사용 과정 및 부위별 케어법: 사용 방법 및 꿀팁 (눈가, 팔자, 목주름 등)
+   - 전후 비교 및 총평: 비포/애프터 체감 후기
+   - 프로모션 및 특가 안내: 프로모션 일정('{event_info}'), 할인 가격, 구매처 링크 안내
+5. [과대광고 심의 준수]: 치료/의학적 효능 대신 사용감과 체감 위주로 기술합니다.
+6. [필수 해시태그]: 가이드에 지정된 필수 해시태그('{essential_tags}')만 최하단에 정확히 배치합니다.
+
+[출력 양식 템플릿 - 아래 형식을 엄격히 지켜 출력할 것]
+
+[네이버 블로그 추천 제목 5선]
+1. (메인 키워드 포함 클릭률 높은 제목)
+2. (메인 키워드 포함 클릭률 높은 제목)
+3. (메인 키워드 포함 클릭률 높은 제목)
+4. (메인 키워드 포함 클릭률 높은 제목)
+5. (메인 키워드 포함 클릭률 높은 제목)
+
+-------------------------------------------------------
+
+[사진 1]
+(촬영 가이드: 제품 본품 연출 컷 또는 고민 부위 클로즈업 컷)
+
+[원고 텍스트]
+(도입부: 최근 겪고 있는 피부 고민과 제품을 사용해보게 된 계기를 솔직하고 친근하게 이야기하는 텍스트)
+
+
+[사진 2]
+(촬영 가이드: 제품 패키지 외관 및 토출구/어플리케이터 클로즈업 컷)
+
+[원고 텍스트]
+(브랜드 및 제품의 핵심 성분과 USP, 특징을 소개하는 텍스트)
+
+
+[사진 3]
+(촬영 가이드: 손등이나 피부에 제형을 덜어내어 텍스처와 발림성을 보여주는 컷)
+
+[원고 텍스트]
+(제형의 촉촉함, 흡수력, 끈적임 여부 등을 생생하게 묘사하는 텍스트)
+
+
+[사진 4]
+(촬영 가이드: 실제 얼굴/고민 부위에 제품을 도포하고 롤링/마사지하며 바르는 실사용 컷)
+
+[원고 텍스트]
+(직접 사용하면서 느낀 사용 편의성과 부위별 관리 꿀팁을 전하는 텍스트)
+
+
+[사진 5]
+(촬영 가이드: 제품 사용 전후 비교(비포&애프터) 컷 또는 광채/탄력이 정돈된 피부 컷)
+
+[원고 텍스트]
+(실제 사용 후 피부 변화 체감과 솔직한 찐후기 총평)
+
+
+[사진 6]
+(촬영 가이드: 올리브영/판매처 화면 캡처 또는 제품을 들고 있는 마무리 컷)
+
+[원고 텍스트]
+(프로모션 일정, 할인 혜택, 특가 가격, 구매처 안내 및 마무리 추천 멘트)
+
+-------------------------------------------------------
+
+[필수 해시태그]
+{essential_tags if essential_tags else ''}
+"""
+                prompt_text = f"""
+다음 정보를 바탕으로 위 블로그 템플릿 규칙을 100% 지켜 네이버 블로그 원고를 작성해줘:
+- 브랜드명: {brand_name}
+- 제품 USP: {product_usp}
+- 행사/가격 정보: {event_info if event_info else '가이드 참조'}
+- 타겟층: {target_audience}
+- 필수 해시태그: {essential_tags if essential_tags else '없음'}
+- 추가 전달사항: {guideline_text if guideline_text else '없음'}
+{url_context}
+"""
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
+                contents.append(prompt_text)
+
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-3.6-flash",
+                        contents=contents,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_instruction_blog,
+                            temperature=0.4,
+                        )
+                    )
+                    st.success("📝 네이버 블로그 원고가 성공적으로 완성되었습니다!")
+                    st.text_area("📋 블로그/워드 복사용 (전체 선택 후 복사)", response.text, height=400)
+                    st.markdown("---")
+                    st.markdown(response.text)
+                except Exception as e:
+                    st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
