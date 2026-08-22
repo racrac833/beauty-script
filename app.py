@@ -28,6 +28,8 @@ if "event_info" not in st.session_state:
     st.session_state.event_info = ""
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
+if "generated_result" not in st.session_state:
+    st.session_state.generated_result = ""
 
 is_insta = (st.session_state.content_mode == "instagram")
 
@@ -49,7 +51,12 @@ st.html(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 탭: INSTAGRAM (비활성 시 20% 밝은 톤) */
+    /* 2. 1열 수평 정렬 컨테이너 내부 수직 중앙 맞춤 */
+    div[data-testid="stHorizontalBlock"] {{
+        align-items: center !important;
+    }}
+
+    /* 좌측 탭: INSTAGRAM */
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
@@ -64,7 +71,7 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 2. 상단 탭: BLOG (비활성 시 20% 밝은 톤) */
+    /* 우측 탭: BLOG */
     .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
@@ -79,15 +86,12 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 생성 버튼: Streamlit 컨테이너 전역 중앙 정렬 */
+    /* 중앙 하트 생성 버튼 (98px 원형) */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        width: 100% !important;
-        margin: 0 auto !important;
     }}
-
     .st-key-btn_generate_main button {{
         width: 98px !important;
         height: 98px !important;
@@ -110,13 +114,9 @@ st.html(f"""
         align-items: center !important;
         justify-content: center !important;
     }}
-
-    /* 버튼 내부 텍스트 숨김 */
     .st-key-btn_generate_main button * {{
         display: none !important;
     }}
-
-    /* SVG 단일 하트 정중앙 렌더링 */
     .st-key-btn_generate_main button::after {{
         content: "" !important;
         display: block !important;
@@ -130,7 +130,6 @@ st.html(f"""
         -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
         mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center / contain !important;
     }}
-
     .st-key-btn_generate_main button:hover {{
         transform: scale(1.08) !important;
         box-shadow: {
@@ -153,11 +152,11 @@ if not api_key:
 client = genai.Client(api_key=api_key)
 
 class ExtractedGuide(BaseModel):
-    brand_name: str = Field(description="가이드/상세페이지에서 소개하는 실제 화장품/뷰티 브랜드명 (체험단 플랫폼명인 '오늘룩', 'oneulook' 등은 절대 브랜드명이 아님)")
+    brand_name: str = Field(description="가이드/상세페이지에서 소개하는 실제 화장품/뷰티 브랜드명")
     product_usp: str = Field(description="실제 제품의 핵심 USP, 제형 특성, 주요 성분 및 효과 요약")
     target_audience: str = Field(description="타겟층 정보 (기본: 30대 여성)")
     essential_tags: str = Field(description="가이드에 명시된 필수 해시태그 목록 (#포함)")
-    account_tags: str = Field(description="실제 브랜드의 공식 계정 태그 (@포함, 체험단 중개 계정 제외)")
+    account_tags: str = Field(description="실제 브랜드의 공식 계정 태그 (@포함)")
     event_info: str = Field(description="실제 소비자가 보는 프로모션 일정, 할인 가격, 구매처")
 
 def fetch_url_content(url):
@@ -294,23 +293,23 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [상단 채널 선택 탭 2개: 좌우 60% 슬림 중앙 정렬] ====================
-pad_left, tab_col1, tab_col2, pad_right = st.columns([0.2, 0.3, 0.3, 0.2])
+# ==================== [1열 수평 정렬: INSTAGRAM - 하트 - BLOG] ====================
+col_insta, col_heart, col_blog = st.columns([0.42, 0.16, 0.42])
 
-with tab_col1:
+with col_insta:
     if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
         st.session_state.content_mode = "instagram"
         st.rerun()
 
-with tab_col2:
+with col_heart:
+    generate_action = st.button("EXECUTE", key="btn_generate_main")
+
+with col_blog:
     if st.button("BLOG", use_container_width=True, key="tab_blog"):
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-
-# ==================== [하단 생성 버튼: 컬럼 분할 없이 전역 완벽 중앙 정렬] ====================
-generate_action = st.button("EXECUTE", key="btn_generate_main")
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
@@ -332,32 +331,40 @@ if generate_action:
 
 [핵심 절대 원칙 (CRITICAL)]
 
-1. [썸네일 추천 문구 최소 5선 필수 생성]:
+1. [자막 분절 요약 원칙 (CRITICAL)]:
+- 각 장면의 나레이션 문장을 크게 전반부와 후반부 2개의 핵심 의미로 나눈 뒤, 자막은 반드시 아래와 같이 [앞쪽 나레이션 요약 / 뒤쪽 나레이션 요약] 구조로 작성합니다.
+- (예시 나레이션: "집에서도 시술급으로 모공 초집중 케어하고 싶다면 이번 올영세일 기간에 브이티코스메틱 신상으로 무조건 정착해 보세요")
+  -> 자막:
+     집에서 시술급 모공 집중 케어
+     /
+     올영세일 신상 무조건 정착
+
+2. [썸네일 추천 문구 최소 5선 필수 생성]:
 - [베스트 썸네일] 1종 외에 [추천 썸네일 문구 5선]을 반드시 별도로 작성합니다.
 - 모든 썸네일은 2줄 형태이며, 첫째 줄은 공백 제외 10자 이내, 둘째 줄은 공백 제외 12자 이내를 엄수합니다.
 
-2. [7~8개 핵심 씬(Scene) 구성 - 30초 이상 러닝타임 유지]:
-- 장면 갯수를 [1. 장면]부터 [7. 장면] 또는 [8. 장면]까지 딱 알맞은 핵심 7~8개 씬으로 압축합니다.
-- 각 씬마다 3~4초 분량의 대사와 연출을 알차게 담아, 씬 수는 7~8개로 간결하면서도 전체 영상 시간은 반드시 30초 이상(30~45초) 나오도록 작성합니다.
+3. [7~8개 핵심 씬(Scene) 구성 - 30초 이상 러닝타임 유지]:
+- 장면 갯수를 [1. 장면]부터 [7. 장면] 또는 [8. 장면]까지 핵심 7~8개 씬으로 구성합니다.
+- 각 씬마다 3~4초 분량의 대사와 연출을 알차게 담아, 씬 수는 7~8개이면서 전체 영상 시간은 반드시 30초 이상(30~45초) 나오도록 작성합니다.
 
-3. [초반 0~3초 극강 후킹 연출 (1번 씬)]:
+4. [초반 0~3초 극강 후킹 연출 (1번 씬)]:
 - 1번 씬은 시청자가 스크롤을 멈추도록 극명한 비포애프터, 파격적인 제형 토출, 외국인 싹쓸이 대란 등 시각적/청각적 후킹을 극대화하여 구성합니다.
 
-4. [빠른 템포 나레이션 분량 엄수 (30초 이상)]:
+5. [빠른 템포 나레이션 분량 엄수 (30초 이상)]:
 - 빠른 템포로 읽었을 때 30초 이상(약 35~45초) 나오는 분량인 공백 포함 450자 ~ 550자 내외로 풍성하게 작성합니다.
 - 전체 나레이션은 최하단 '나레이션만 정리'에 순서대로 모아서 출력합니다.
 
-5. [서술어 중복 절대 금지 (표현 다양화)]:
+6. [서술어 중복 절대 금지 (표현 다양화)]:
 - 한 대본 내에서 동일한 서술어나 종결 어미가 2회 이상 반복되지 않도록 엄격히 통제합니다.
 - (금지 예시: ~좋아요. ~도 좋아요. / ~느낌이에요. ~하는 느낌이에요.)
 - (권장 예시: ~정착했잖아요, ~감탄 나오더라고요, ~싹 잡히는 기분이에요, ~유용한 것 같아요, ~무조건 챙기세요, ~놀랍더라고요, ~손이 자주 가요 등 문장마다 종결 어미를 다채롭게 변형)
 
-6. [브랜드명 및 필수 요소 원형 유지]:
+7. [브랜드명 및 필수 요소 원형 유지]:
 - 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
 - 가이드 필수 해시태그('{essential_tags}') 외에는 임의 추천 태그를 추가하지 않습니다.
 - 행사 정보('{event_info}')는 마지막 씬 및 캡션에 정확한 기간, 할인 가격, 구매처를 명시합니다.
 
-7. [자막 표기 규칙]:
+8. [자막 표기 규칙]:
 - 자막에 특수문자/이모티콘/느낌표 금지
 - 자막 줄바꿈 시 한 줄에 쓰지 않고 반드시 단독 줄로 / 배치
 - 각주는 (하단 각주 삽입)과 * 표시 명시
@@ -397,9 +404,9 @@ if generate_action:
 (0~3초 극강 후킹 연출: 해외 바이럴 대란 또는 고민 부위 클로즈업)
 
 자막：
-자막 첫 문장
+(앞쪽 나레이션 요약 문장)
 /
-자막 둘째 문장
+(뒤쪽 나레이션 요약 문장)
 /
 (필요시 로고 또는 제품명)
 
@@ -413,7 +420,9 @@ if generate_action:
 자막：
 비포 애프터
 /
-자막 문장
+(앞쪽 나레이션 요약 문장)
+/
+(뒤쪽 나레이션 요약 문장)
 
 나레이션：
 (대사)
@@ -423,9 +432,9 @@ if generate_action:
 (핵심 성분 및 텍스처 발림성/흡수력 연출)
 
 자막：
-자막 문장
+(앞쪽 나레이션 요약 문장)
 /
-자막 문장
+(뒤쪽 나레이션 요약 문장)
 
 나레이션：
 (대사)
@@ -435,11 +444,11 @@ if generate_action:
 (고민 부위 집중 롤링/마사지 실사용 연출)
 
 자막：
-자막 문장*
+(앞쪽 나레이션 요약 문장)*
 (하단 각주 삽입)
 *각주 내용
 /
-자막 문장
+(뒤쪽 나레이션 요약 문장)
 
 나레이션：
 (대사)
@@ -449,9 +458,9 @@ if generate_action:
 (풀페이스 확장 케어: 이마, 미간, 팔자, 목주름 등 꿀팁 연출)
 
 자막：
-자막 문장
+(앞쪽 나레이션 요약 문장)
 /
-자막 문장
+(뒤쪽 나레이션 요약 문장)
 
 나레이션：
 (대사)
@@ -463,7 +472,9 @@ if generate_action:
 자막：
 비포 애프터
 /
-자막 문장
+(앞쪽 나레이션 요약 문장)
+/
+(뒤쪽 나레이션 요약 문장)
 
 나레이션：
 (대사)
@@ -505,7 +516,7 @@ if generate_action:
 (1번부터 마지막 씬까지의 전체 나레이션 전문을 모아서 출력 / 서술어 중복 없는 자연스러운 30~45초 분량, 공백 포함 450~550자 내외)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 5대 원칙(썸네일 5선, 7~8개 씬 구성, 초반 3초 후킹, 30초 이상 나레이션, 서술어 중복 금지)을 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿과 원칙(자막 앞뒤 요약 분절, 썸네일 5선, 7~8개 씬 구성, 초반 3초 후킹, 30초 이상 나레이션, 서술어 중복 금지)을 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 브랜드명: {brand_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
@@ -526,10 +537,7 @@ if generate_action:
                             temperature=0.4,
                         )
                     )
-                    st.success("인스타그램 대본 생성이 완료되었습니다!")
-                    st.text_area("📋 워드 복사용 (전체 선택 후 복사하여 워드에 붙여넣으세요)", response.text, height=350)
-                    st.markdown("---")
-                    st.markdown(response.text)
+                    st.session_state.generated_result = response.text
                 except Exception as e:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
@@ -640,10 +648,23 @@ if generate_action:
                             temperature=0.4,
                         )
                     )
-                    st.success("블로그 원고 생성이 완료되었습니다!")
-                    st.text_area("📋 블로그/워드 복사용 (전체 선택 후 복사)", response.text, height=400)
-                    st.markdown("---")
-                    st.markdown(response.text)
+                    st.session_state.generated_result = response.text
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
-                    
+
+# ==================== [결과 화면: 복사하기 아이콘 & 원문 출력] ====================
+if st.session_state.generated_result:
+    label_type = "인스타그램 대본" if is_insta else "블로그 원고"
+    
+    # 텍스트 복사 버튼 (JS 클립보드 복사)
+    escaped_result = json.dumps(st.session_state.generated_result)
+    copy_html = f"""
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+        <button onclick="navigator.clipboard.writeText({escaped_result}); alert('📋 {label_type}이(가) 클립보드에 복사되었습니다!');" 
+                style="background: #2a2d32; color: #ffffff; border: 1px solid #5a5f69; border-radius: 8px; padding: 10px 18px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+            📋 {label_type} 복사하기
+        </button>
+    </div>
+    """
+    st.components.v1.html(copy_html, height=55)
+    st.markdown(st.session_state.generated_result)
