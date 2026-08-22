@@ -41,7 +41,24 @@ if "blog_photo_count" not in st.session_state:
 
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 버튼 스타일링] ====================
+# 순수 HTML 컴포넌트의 클릭 신호를 안전하게 처리하는 콜백 핸들러
+query_params = st.query_params
+if "sel_insta" in query_params:
+    try:
+        st.session_state.insta_scene_count = int(query_params["sel_insta"])
+        st.query_params.clear()
+        st.rerun()
+    except Exception:
+        pass
+if "sel_blog" in query_params:
+    try:
+        st.session_state.blog_photo_count = int(query_params["sel_blog"])
+        st.query_params.clear()
+        st.rerun()
+    except Exception:
+        pass
+
+# ==================== [2. 테마 컬러 및 완벽 고정형 커스텀 박스 스타일링] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
@@ -239,25 +256,46 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 숫자 선택 버튼 (백색 글씨, 크기 고정, 클릭 시 아래 밀림 현상 방지) */
-    section[data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] button {{
-        height: 38px !important;
-        border-radius: 8px !important;
-        font-weight: 900 !important;
-        font-size: 14px !important;
-        background-color: #22252b !important;
-        color: #FFFFFF !important;
-        border: 1px solid #3d424b !important;
-        box-shadow: none !important;
-        transform: none !important;
+    /* 6. [최종 완성형] 100% 동일한 크기, 백색 글씨, 클릭 시 움직임 없음, 테두리 없이 색 채우기 */
+    .grid-7 {{
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        margin-bottom: 15px;
+        width: 100%;
     }}
-    section[data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] button:hover {{
-        border-color: {active_color} !important;
-        color: #FFFFFF !important;
-        transform: none !important;
+    .grid-6 {{
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+        margin-bottom: 15px;
+        width: 100%;
     }}
-    section[data-testid="stSidebar"] div[data-testid="stHorizontalBlock"] button:active {{
-        transform: none !important;
+    .fixed-box {{
+        background: #22252b;
+        border: 1px solid #3d424b;
+        border-radius: 8px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF !important;
+        font-size: 14px;
+        font-weight: 900;
+        text-decoration: none !important;
+        transition: none !important;
+        user-select: none;
+        box-sizing: border-box;
+    }}
+    .fixed-box:hover {{
+        border-color: {active_color};
+        color: #FFFFFF !important;
+    }}
+    .fixed-box.active {{
+        background: {theme_bg} !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        box-shadow: {'0 0 10px rgba(220, 39, 67, 0.5)' if is_insta else '0 0 10px rgba(3, 199, 90, 0.5)'};
     }}
 
     /* 7. 결과창 헤더 뱃지 */
@@ -526,7 +564,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # ==================== [새로고침 없는 완벽한 버튼형 선택기] ====================
+    # ==================== [완벽 고정형 커스텀 그리드 선택기 (새로고침/위치 밀림 없음)] ====================
     if is_insta:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
@@ -535,24 +573,12 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
         
-        cols = st.columns(7)
-        for i, val in enumerate(range(6, 13)):
-            with cols[i]:
-                is_selected = (st.session_state.insta_scene_count == val)
-                if is_selected:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="insta_btn_{val}"] {{
-                            background: {insta_gradient} !important;
-                            color: #FFFFFF !important;
-                            border: none !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-
-                if st.button(str(val), key=f"insta_btn_{val}", use_container_width=True):
-                    st.session_state.insta_scene_count = val
-                    st.rerun()
+        html_grid = '<div class="grid-7">'
+        for val in range(6, 13):
+            active_cls = " active" if st.session_state.insta_scene_count == val else ""
+            html_grid += f'<a href="?sel_insta={val}" target="_self" class="fixed-box{active_cls}">{val}</a>'
+        html_grid += '</div>'
+        st.markdown(html_grid, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
@@ -561,27 +587,14 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
         
-        # 15부터 20까지 6개 버튼 균등 배치
+        # 15부터 20까지 총 6개 박스를 6열 그리드로 배치하여 크기 100% 동일 고정
         photo_vals = list(range(15, 21))
-        cols = st.columns(6)
-        
-        for i, val in enumerate(photo_vals):
-            with cols[i]:
-                is_selected = (st.session_state.blog_photo_count == val)
-                if is_selected:
-                    st.markdown(f"""
-                    <style>
-                        div.stButton > button[key="blog_btn_{val}"] {{
-                            background: {naver_green} !important;
-                            color: #FFFFFF !important;
-                            border: none !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-
-                if st.button(str(val), key=f"blog_btn_{val}", use_container_width=True):
-                    st.session_state.blog_photo_count = val
-                    st.rerun()
+        html_grid = '<div class="grid-6">'
+        for val in photo_vals:
+            active_cls = " active" if st.session_state.blog_photo_count == val else ""
+            html_grid += f'<a href="?sel_blog={val}" target="_self" class="fixed-box{active_cls}">{val}</a>'
+        html_grid += '</div>'
+        st.markdown(html_grid, unsafe_allow_html=True)
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
