@@ -42,14 +42,16 @@ if "blog_photo_count" not in st.session_state:
 # 기본 변수 안전 초기화
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 CSS 스타일링] ====================
+# ==================== [2. 테마 컬러 및 CSS 스타일링 (노란색 슬라이더 적용)] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
-theme_color = "#dc2743" if is_insta else "#03C75A"
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
+
+# 슬라이더 전용 단색 노란색 컬러 정의
+slider_yellow = "#FFD700"
 
 st.markdown(f"""
 <style>
@@ -240,7 +242,33 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 결과창 헤더 뱃지 */
+    /* 6. 슬라이더 전용 단색 노란색 스타일 적용 */
+    div[data-testid="stSlider"] {{
+        margin-bottom: 14px !important;
+    }}
+    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
+        margin-top: 6px !important;
+        margin-bottom: 6px !important;
+    }}
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
+        background-color: #383c46 !important;
+        height: 6px !important;
+        border-radius: 4px !important;
+    }}
+    /* 슬라이더 채워진 바(Progress) 컬러 강제 노란색 지정 */
+    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
+        background: {slider_yellow} !important;
+    }}
+    /* 슬라이더 손잡이(노브) 컬러 강제 노란색 지정 */
+    div[data-testid="stSlider"] div[role="slider"] {{
+        background: {slider_yellow} !important;
+        border: 2.5px solid #ffffff !important;
+        width: 18px !important;
+        height: 18px !important;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.8) !important;
+    }}
+
+    /* 7. 결과창 헤더 뱃지 */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -277,7 +305,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 7. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 8. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -506,17 +534,11 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 분량 설정 (모드별 직관적 선택 셀렉터 - 색상 꼬임 및 마커 버그 완전 해결)
+    # 슬라이더 설정 (노란색 단색 적용)
     if is_insta:
-        insta_options = list(range(6, 13))
-        if st.session_state.insta_scene_count not in insta_options:
-            st.session_state.insta_scene_count = 7
-        st.select_slider("인스타 영상 장면 수 (6~12장)", options=insta_options, key="insta_scene_count")
+        st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
     else:
-        blog_options = list(range(8, 21))
-        if st.session_state.blog_photo_count not in blog_options:
-            st.session_state.blog_photo_count = 15
-        st.select_slider("블로그 사진 장수 (8~20장)", options=blog_options, key="blog_photo_count")
+        st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
@@ -674,102 +696,6 @@ if generate_action:
 각 문장별 20~30자 내외 줄바꿈하여 출력)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [카테고리: {current_cat}], [정확히 {target_scenes}개 장면 구성], [자막 서술형 금지 / 명사형 요약], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
-- 카테고리: {current_cat}
-- 장면 수: {target_scenes}개 씬
-- 브랜드명: {brand_name}
-- 제품 USP: {product_usp}
-- 행사/가격 정보: {event_info if event_info else '가이드 참조'}
-- 타겟층: {target_audience}
-- 필수 해시태그: {essential_tags if essential_tags else '없음'}
-- 공식 계정 태그: {account_tags if account_tags else '없음'}
-- 추가 전달사항: {guideline_text if guideline_text else '없음'}
-{url_context}
-"""
-                contents.append(prompt_text)
-
-                try:
-                    response = client.models.generate_content(
-                        model="gemini-3.6-flash",
-                        contents=contents,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction_reels,
-                            temperature=0.4,
-                        )
-                    )
-                    st.session_state.insta_result = response.text
-                except Exception as e:
-                    st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
-
-        else:
-            target_photos = st.session_state.blog_photo_count
-            current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
-                system_instruction_blog = f"""
-[Role & Goal]
-당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
-사용자가 제공한 [카테고리: {current_cat}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
-
-[카테고리별 전문 톤앤매너 지침 - 현재 카테고리: {current_cat}]
-- 기초/스킨케어: 수분감, 속건조, 피부결 정돈, 유수분 밸런스, 쿨링감 중심
-- 색조/메이크업: 자연광 발색, 홋수/톤체크, 밀착력, 묻어남/지속력 테스트 중심
-- 선케어/클렌징: 백탁/눈시림 여부, 세정력 테스트, 잔여감 없는 산뜻함 중심
-- 헤어/바디: 향기 노트(탑/미들/베이스), 거품력, 모발 윤기 및 끈적임 없는 보습 중심
-- 이너뷰티/다이어트: 맛, 섭취 편의성, 개별 포장 휴대성, 꾸준한 데일리 루틴 중심
-- 뷰티소품/디바이스: 그립감, 기기 조작법 단계별 안내, 부위별 마사지 모션 중심
-
-[핵심 절대 원칙 (CRITICAL)]
-
-1. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT - 가로 스크롤 절대 방지)]:
-- (촬영 가이드: ...) 설명이 한 줄로 길게 늘어지지 않게 20~30자 내외마다 엔터(줄바꿈)를 쳐서 2~3줄로 나누어 작성하세요.
-- 본문 [원고 텍스트] 역시 1줄당 25~35자 내외로 자연스럽게 엔터를 쳐서 작성하세요.
-
-2. [사진 장수 정확히 {target_photos}장 구성 (STRICT)]:
-- 반드시 [사진 1]부터 [사진 {target_photos}]까지 정확히 {target_photos}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
-- 각 사진마다 '{current_cat}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
-
-3. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
-- [브랜드명 + 핵심 키워드 + 제품군]을 앞단(15자 이내)에 배치한 제목 5선을 추천합니다.
-
-4. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN)]:
-- '시술', '시술급', '시술받은 것처럼', '보톡스', '필러', '리쥬란', '레이저' 등 모든 시술명 및 비교 표현 절대 금지.
-- 순수 홈케어 사용감과 만족도 위주로 기술하세요.
-
-5. [종결 어미 스타일 엄수]:
-- '~했다', '~해봤다' 등 딱딱한 어미 대신 부드러운 30대 여성 찐후기 어조(~해보고, ~발라봤는데, ~직접 써보니까 등)를 유지하세요.
-
-6. [브랜드명 및 필수 요소 원형 유지]:
-- 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
-- 마지막 사진과 최하단에 프로모션 일정('{event_info}') 및 필수 해시태그('{essential_tags}')를 명시하세요.
-
-[출력 양식 템플릿]
-
-[네이버 블로그 추천 제목 5선 (SEO 최적 글자수 25~35자)]
-1. (브랜드명+키워드 전면 배치 제목)
-2. (브랜드명+키워드 전면 배치 제목)
-3. (브랜드명+키워드 전면 배치 제목)
-4. (브랜드명+키워드 전면 배치 제목)
-5. (브랜드명+키워드 전면 배치 제목)
-
--------------------------------------------------------
-
-[사진 1] 부터 [사진 {target_photos}] 까지 순서대로:
-
-[사진 번호]
-(촬영 가이드: {current_cat} 특성에 맞춘 촬영 가이드 /
-한 줄로 길어지지 않게 20~30자마다
-자연스럽게 엔터로 줄바꿈)
-
-[원고 텍스트]
-(1~2문장 단위로 줄바꿈을 적용한 30대 찐후기 텍스트 /
-가로로 길어지지 않게 25~35자마다 엔터 적용)
-
--------------------------------------------------------
-
-[필수 해시태그]
-{essential_tags if essential_tags else ''}
-"""
-                prompt_text = f"""
 다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {current_cat}], [사진 장수: 정확히 {target_photos}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 카테고리: {current_cat}
 - 사진 장수: {target_photos}장
@@ -777,7 +703,7 @@ if generate_action:
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
-- 필수 해시태그: {essential_tags if essential_tags else '음'}
+- 필수 해시태그: {essential_tags if essential_tags else '없음'}
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
