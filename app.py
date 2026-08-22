@@ -11,61 +11,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-st.set_page_config(page_title="뷰티 콘텐츠 생성기 (인스타 & 블로그)", layout="wide")
-
-# 커스텀 CSS (인스타그램 그라디언트 & 네이버 블로그 그린 스타일)
-st.markdown("""
-<style>
-    /* 제목 스타일 */
-    .main-title {
-        font-size: 26px !important;
-        font-weight: 800;
-        margin-bottom: 25px;
-    }
-    
-    /* 인스타그램 버튼 스타일 */
-    div.stButton > button[key="btn_insta_generate"] {
-        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
-        color: white !important;
-        font-size: 19px !important;
-        font-weight: 800 !important;
-        padding: 14px 20px !important;
-        border-radius: 12px !important;
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3) !important;
-    }
-    div.stButton > button[key="btn_insta_generate"]:hover {
-        opacity: 0.95;
-        transform: translateY(-1px);
-    }
-
-    /* 네이버 블로그 버튼 스타일 */
-    div.stButton > button[key="btn_blog_generate"] {
-        background-color: #03C75A !important;
-        color: white !important;
-        font-size: 19px !important;
-        font-weight: 800 !important;
-        padding: 14px 20px !important;
-        border-radius: 12px !important;
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.3) !important;
-    }
-    div.stButton > button[key="btn_blog_generate"]:hover {
-        background-color: #02b351 !important;
-        transform: translateY(-1px);
-    }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown('<div class="main-title">✨ 뷰티 인스타그램 대본 & 블로그 원고 생성기</div>', unsafe_allow_html=True)
-
-# API 클라이언트 초기화
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    st.error(".env 파일에 GEMINI_API_KEY를 설정해주세요.")
-    st.stop()
-
-client = genai.Client(api_key=api_key)
+st.set_page_config(page_title="뷰티 콘텐츠 생성기", layout="wide")
 
 # 세션 상태 초기화
 if "brand_name" not in st.session_state:
@@ -82,6 +28,85 @@ if "event_info" not in st.session_state:
     st.session_state.event_info = ""
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
+
+# 커스텀 CSS
+st.markdown("""
+<style>
+    /* 상단 인스타그램 모드 선택 버튼 */
+    div.stButton > button[key="tab_insta_active"] {
+        background: linear-gradient(45deg, #f09433, #dc2743, #bc1888) !important;
+        color: white !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        padding: 12px 0px !important;
+        border-radius: 10px !important;
+        border: none !important;
+    }
+    div.stButton > button[key="tab_insta_inactive"] {
+        background-color: #f8f9fa !important;
+        color: #666666 !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        padding: 12px 0px !important;
+        border-radius: 10px !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    /* 상단 블로그 모드 선택 버튼 */
+    div.stButton > button[key="tab_blog_active"] {
+        background-color: #03C75A !important;
+        color: white !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        padding: 12px 0px !important;
+        border-radius: 10px !important;
+        border: none !important;
+    }
+    div.stButton > button[key="tab_blog_inactive"] {
+        background-color: #f8f9fa !important;
+        color: #666666 !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        padding: 12px 0px !important;
+        border-radius: 10px !important;
+        border: 1px solid #ddd !important;
+    }
+
+    /* 하단 인스타그램 생성 실행 버튼 */
+    div.stButton > button[key="btn_insta_generate"] {
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+        color: white !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        padding: 14px 20px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3) !important;
+    }
+
+    /* 하단 네이버 블로그 생성 실행 버튼 */
+    div.stButton > button[key="btn_blog_generate"] {
+        background-color: #03C75A !important;
+        color: white !important;
+        font-size: 19px !important;
+        font-weight: 800 !important;
+        padding: 14px 20px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(3, 199, 90, 0.3) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("✨ 뷰티 인스타그램 대본 & 블로그 원고 생성기")
+
+# API 클라이언트 초기화
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    st.error(".env 파일에 GEMINI_API_KEY를 설정해주세요.")
+    st.stop()
+
+client = genai.Client(api_key=api_key)
 
 class ExtractedGuide(BaseModel):
     brand_name: str = Field(description="가이드/상세페이지/이미지에서 확인된 원문 그대로의 정확한 브랜드명 (단 1글자도 변경/번역 금지)")
@@ -207,49 +232,26 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [메인 영역: 채널 선택 카드] ====================
-st.markdown("### 📌 작성할 콘텐츠 유형을 선택하세요")
-
+# ==================== [메인 영역: 심플 모드 선택 버튼] ====================
 col1, col2 = st.columns(2)
 
 with col1:
-    is_insta = (st.session_state.content_mode == "instagram")
-    insta_card_border = "3px solid #dc2743" if is_insta else "1px solid #e0e0e0"
-    insta_bg = "linear-gradient(135deg, rgba(240, 148, 51, 0.08) 0%, rgba(220, 39, 67, 0.08) 100%)" if is_insta else "#ffffff"
-    
-    st.markdown(f"""
-    <div style="border: {insta_card_border}; background: {insta_bg}; padding: 18px 20px; border-radius: 14px; text-align: center; margin-bottom: 10px;">
-        <span style="font-size: 32px;">📸</span>
-        <div style="font-size: 20px; font-weight: 800; color: #dc2743; margin-top: 5px;">인스타그램 대본</div>
-        <div style="font-size: 13px; color: #666; margin-top: 4px;">숏폼 릴스 전용 / 30대 여성 찐후기 콘티</div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("📸 인스타그램 대본 선택", use_container_width=True, key="select_insta"):
+    insta_key = "tab_insta_active" if st.session_state.content_mode == "instagram" else "tab_insta_inactive"
+    if st.button("인스타그램", use_container_width=True, key=insta_key):
         st.session_state.content_mode = "instagram"
         st.rerun()
 
 with col2:
-    is_blog = (st.session_state.content_mode == "blog")
-    blog_card_border = "3px solid #03C75A" if is_blog else "1px solid #e0e0e0"
-    blog_bg = "rgba(3, 199, 90, 0.08)" if is_blog else "#ffffff"
-    
-    st.markdown(f"""
-    <div style="border: {blog_card_border}; background: {blog_bg}; padding: 18px 20px; border-radius: 14px; text-align: center; margin-bottom: 10px;">
-        <span style="font-size: 32px;">📝</span>
-        <div style="font-size: 20px; font-weight: 800; color: #03C75A; margin-top: 5px;">블로그 원고</div>
-        <div style="font-size: 13px; color: #666; margin-top: 4px;">네이버 SEO 최적화 / 사진 촬영 가이드 포함</div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("📝 블로그 원고 선택", use_container_width=True, key="select_blog"):
+    blog_key = "tab_blog_active" if st.session_state.content_mode == "blog" else "tab_blog_inactive"
+    if st.button("블로그", use_container_width=True, key=blog_key):
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-# ==================== [선택된 모드에 따른 화면 및 생성 버튼] ====================
+# ==================== [선택된 모드에 따른 생성 실행] ====================
 
 if st.session_state.content_mode == "instagram":
-    st.markdown("#### 🎬 인스타그램 릴스 대본 작성 모드")
     generate_insta = st.button("📸 인스타그램 대본 생성하기", use_container_width=True, key="btn_insta_generate")
     
     if generate_insta:
@@ -393,7 +395,6 @@ if st.session_state.content_mode == "instagram":
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
 else:
-    st.markdown("#### 📝 네이버 블로그 원고 작성 모드")
     generate_blog = st.button("📝 블로그 원고 생성하기", use_container_width=True, key="btn_blog_generate")
     
     if generate_blog:
