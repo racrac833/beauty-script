@@ -51,46 +51,65 @@ st.html(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 1열 수평 정렬 컨테이너 내부 수직 중앙 맞춤 */
+    /* 2. 1열 수평 정렬 컨테이너 내부 수직/수평 맞춤 */
     div[data-testid="stHorizontalBlock"] {{
         align-items: center !important;
+        justify-content: center !important;
     }}
 
-    /* 좌측 탭: INSTAGRAM */
+    /* 좌측 탭: INSTAGRAM (60% 슬림 폭) */
+    .st-key-tab_insta {{
+        display: flex !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+    }}
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
+        width: 60% !important;
+        min-width: 140px !important;
+        max-width: 220px !important;
         box-shadow: {'0 4px 15px rgba(220, 39, 67, 0.5)' if is_insta else 'none'} !important;
     }}
     .st-key-tab_insta button * {{
         color: {'#ffffff' if is_insta else '#f0f0f0'} !important;
-        font-size: 17px !important;
+        font-size: 16px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 우측 탭: BLOG */
+    /* 우측 탭: BLOG (60% 슬림 폭) */
+    .st-key-tab_blog {{
+        display: flex !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+    }}
     .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
         border-radius: 30px !important;
         height: 50px !important;
+        width: 60% !important;
+        min-width: 140px !important;
+        max-width: 220px !important;
         box-shadow: {'0 4px 15px rgba(3, 199, 90, 0.5)' if not is_insta else 'none'} !important;
     }}
     .st-key-tab_blog button * {{
         color: {'#ffffff' if not is_insta else '#f0f0f0'} !important;
-        font-size: 17px !important;
+        font-size: 16px !important;
         font-weight: 800 !important;
         letter-spacing: 1px !important;
     }}
 
-    /* 중앙 하트 생성 버튼 (98px 원형) */
+    /* 중앙 하트 생성 버튼 (98px 원형 완벽 중앙 고정) */
     .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
     }}
     .st-key-btn_generate_main button {{
         width: 98px !important;
@@ -138,7 +157,7 @@ st.html(f"""
         } !important;
     }}
 </style>
-""")
+""", unsafe_allow_html=True)
 
 # 중앙 영문 타이틀 출력
 st.markdown('<div class="ramilove-header">RAMILOVE</div>', unsafe_allow_html=True)
@@ -293,11 +312,11 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [1열 수평 정렬: INSTAGRAM - 하트 - BLOG] ====================
-col_insta, col_heart, col_blog = st.columns([0.42, 0.16, 0.42])
+# ==================== [대칭 3단 정렬: INSTAGRAM(우측정렬) - 하트(정중앙) - BLOG(좌측정렬)] ====================
+col_insta, col_heart, col_blog = st.columns([0.43, 0.14, 0.43])
 
 with col_insta:
-    if st.button("INSTAGRAM", use_container_width=True, key="tab_insta"):
+    if st.button("INSTAGRAM", key="tab_insta"):
         st.session_state.content_mode = "instagram"
         st.rerun()
 
@@ -305,7 +324,7 @@ with col_heart:
     generate_action = st.button("EXECUTE", key="btn_generate_main")
 
 with col_blog:
-    if st.button("BLOG", use_container_width=True, key="tab_blog"):
+    if st.button("BLOG", key="tab_blog"):
         st.session_state.content_mode = "blog"
         st.rerun()
 
@@ -656,7 +675,6 @@ if generate_action:
 if st.session_state.generated_result:
     label_type = "인스타그램 대본" if is_insta else "블로그 원고"
     
-    # 텍스트 복사 버튼 (JS 클립보드 복사)
     escaped_result = json.dumps(st.session_state.generated_result)
     copy_html = f"""
     <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
