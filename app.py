@@ -41,14 +41,14 @@ if "blog_photo_count" not in st.session_state:
 
 generate_action = False
 
-# ==================== [2. 테마 컬러 완벽 동기화 (상단 탭 결정 직후 정의)] ====================
+# ==================== [2. 테마 컬러 완벽 동기화] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
 
 theme_bg = insta_gradient if is_insta else naver_green
 theme_border = "#ff4b72" if is_insta else "#00ff6f"
-active_color = "#dc2743" if is_insta else "#03C75A"
+active_color = "#e6683c" if is_insta else "#03C75A"
 
 st.markdown(f"""
 <style>
@@ -239,7 +239,16 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 6. 결과창 헤더 뱃지 */
+    /* 6. 선택형 숫자 버튼 크기 및 스타일 완벽 통일화 */
+    div[data-testid="stHorizontalBlock"] button {{
+        height: 42px !important;
+        border-radius: 10px !important;
+        font-weight: 800 !important;
+        font-size: 14px !important;
+        transition: all 0.15s ease-in-out !important;
+    }}
+
+    /* 7. 결과창 헤더 뱃지 */
     .result-header-wrapper {{
         display: flex;
         align-items: center;
@@ -276,7 +285,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 7. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 8. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -502,46 +511,47 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
     # 공통: 제품 카테고리
-    categories = ["기초/스킨케어", "색조/메이크업", "선케er/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
-    st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"], key="product_category")
+    categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
+    st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # ==================== [완벽한 테마 일치 커스텀 선택바 (버그 원천 차단)] ====================
+    # ==================== [크기 완벽 일치 커스텀 버튼 셀렉터] ====================
     if is_insta:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
-            인스타 영상 장면 수 (6~12장) - 현재: <b style="color:{active_color}; font-size:16px;">{st.session_state.insta_scene_count}개</b>
+            인스타 영상 장면 수 (6~12장) - 선택됨: <b style="color:{active_color}; font-size:15px;">{st.session_state.insta_scene_count}개</b>
         </div>
         """, unsafe_allow_html=True)
         
-        cols_scene = st.columns(7)
+        # 7개씩 한 줄에 균등 배치
+        cols = st.columns(7)
         for i, val in enumerate(range(6, 13)):
-            with cols_scene[i]:
+            with cols[i]:
                 is_selected = (st.session_state.insta_scene_count == val)
-                btn_bg = theme_bg if is_selected else "#262930"
-                btn_border = "2px solid #ffffff" if is_selected else "1px solid #3d424b"
-                btn_color = "#ffffff" if is_selected else "#9aa0a6"
+                # 선택된 버튼은 테마 배경, 미선택은 다크 그레이 배경
+                btn_style = f"background: {theme_bg} !important; color: white !important; border: 2px solid #ffffff !important;" if is_selected else "background: #2a2e39 !important; color: #b0b5c1 !important; border: 1px solid #3d424b !important;"
                 
-                if st.button(str(val), key=f"scene_{val}", use_container_width=True):
+                if st.button(str(val), key=f"insta_btn_{val}", use_container_width=True):
                     st.session_state.insta_scene_count = val
                     st.rerun()
     else:
         st.markdown(f"""
         <div style="font-size:14px; font-weight:700; color:#e3e3e3; margin-bottom:8px; display:flex; align-items:center; gap:7px;">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:{theme_bg};"></span>
-            블로그 사진 장수 (8~20장) - 현재: <b style="color:{active_color}; font-size:16px;">{st.session_state.blog_photo_count}장</b>
+            블로그 사진 장수 (8~20장) - 선택됨: <b style="color:{active_color}; font-size:15px;">{st.session_state.blog_photo_count}장</b>
         </div>
         """, unsafe_allow_html=True)
         
+        # 13개 번호를 균일하게 7개 / 6개로 나누어 배치
         photo_vals = list(range(8, 21))
-        row1 = st.columns(7)
-        row2 = st.columns(6)
+        row1_cols = st.columns(7)
+        row2_cols = st.columns(6)
         
         for i, val in enumerate(photo_vals):
-            target_col = row1[i] if i < 7 else row2[i - 7]
+            target_col = row1_cols[i] if i < 7 else row2_cols[i - 7]
             with target_col:
                 is_selected = (st.session_state.blog_photo_count == val)
-                if st.button(str(val), key=f"photo_{val}", use_container_width=True):
+                if st.button(str(val), key=f"blog_btn_{val}", use_container_width=True):
                     st.session_state.blog_photo_count = val
                     st.rerun()
 
@@ -701,102 +711,6 @@ if generate_action:
 각 문장별 20~30자 내외 줄바꿈하여 출력)
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿과 [카테고리: {current_cat}], [정확히 {target_scenes}개 장면 구성], [자막 서술형 금지 / 명사형 요약], [가로 스크롤 방지 20~30자 줄바꿈], [시술명 금지], [베스트 썸네일 + 추천 5선], [~했다 금지]를 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
-- 카테고리: {current_cat}
-- 장면 수: {target_scenes}개 씬
-- 브랜드명: {brand_name}
-- 제품 USP: {product_usp}
-- 행사/가격 정보: {event_info if event_info else '가이드 참조'}
-- 타겟층: {target_audience}
-- 필수 해시태그: {essential_tags if essential_tags else '없음'}
-- 공식 계정 태그: {account_tags if account_tags else '없음'}
-- 추가 전달사항: {guideline_text if guideline_text else '없음'}
-{url_context}
-"""
-                contents.append(prompt_text)
-
-                try:
-                    response = client.models.generate_content(
-                        model="gemini-3.6-flash",
-                        contents=contents,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction_reels,
-                            temperature=0.4,
-                        )
-                    )
-                    st.session_state.insta_result = response.text
-                except Exception as e:
-                    st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
-
-        else:
-            target_photos = st.session_state.blog_photo_count
-            current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
-                system_instruction_blog = f"""
-[Role & Goal]
-당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
-사용자가 제공한 [카테고리: {current_cat}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
-
-[카테고리별 전문 톤앤매너 지침 - 현재 카테고리: {current_cat}]
-- 기초/스킨케어: 수분감, 속건조, 피부결 정돈, 유수분 밸런스, 쿨링감 중심
-- 색조/메이크업: 자연광 발색, 홋수/톤체크, 밀착력, 묻어남/지속력 테스트 중심
-- 선케어/클렌징: 백탁/눈시림 여부, 세정력 테스트, 잔여감 없는 산뜻함 중심
-- 헤어/바디: 향기 노트(탑/미들/베이스), 거품력, 모발 윤기 및 끈적임 없는 보습 중심
-- 이너뷰티/다이어트: 맛, 섭취 편의성, 개별 포장 휴대성, 꾸준한 데일리 루틴 중심
-- 뷰티소품/디바이스: 그립감, 기기 조작법 단계별 안내, 부위별 마사지 모션 중심
-
-[핵심 절대 원칙 (CRITICAL)]
-
-1. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT - 가로 스크롤 절대 방지)]:
-- (촬영 가이드: ...) 설명이 한 줄로 길게 늘어지지 않게 20~30자 내외마다 엔터(줄바꿈)를 쳐서 2~3줄로 나누어 작성하세요.
-- 본문 [원고 텍스트] 역시 1줄당 25~35자 내외로 자연스럽게 엔터를 쳐서 작성하세요.
-
-2. [사진 장수 정확히 {target_photos}장 구성 (STRICT)]:
-- 반드시 [사진 1]부터 [사진 {target_photos}]까지 정확히 {target_photos}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
-- 각 사진마다 '{current_cat}' 특성에 맞는 최적의 [촬영 가이드]를 명시하고, 제형/발림성/롤링/사용 과정에는 체류시간 증대를 위해 '[GIF 권장]'을 1~2개 포함하세요.
-
-3. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
-- [브랜드명 + 핵심 키워드 + 제품군]을 앞단(15자 이내)에 배치한 제목 5선을 추천합니다.
-
-4. [의료/피부과 시술명 및 시술 비교 표현 절대 금지 (STRICT BAN)]:
-- '시술', '시술급', '시술받은 것처럼', '보톡스', '필러', '리쥬란', '레이저' 등 모든 시술명 및 비교 표현 절대 금지.
-- 순수 홈케어 사용감과 만족도 위주로 기술하세요.
-
-5. [종결 어미 스타일 엄수]:
-- '~했다', '~해봤다' 등 딱딱한 어미 대신 부드러운 30대 여성 찐후기 어조(~해보고, ~발라봤는데, ~직접 써보니까 등)를 유지하세요.
-
-6. [브랜드명 및 필수 요소 원형 유지]:
-- 브랜드명은 반드시 '{brand_name}' 그대로 단 1글자의 변형도 없이 사용합니다.
-- 마지막 사진과 최하단에 프로모션 일정('{event_info}') 및 필수 해시태그('{essential_tags}')를 명시하세요.
-
-[출력 양식 템플릿]
-
-[네이버 블로그 추천 제목 5선 (SEO 최적 글자수 25~35자)]
-1. (브랜드명+키워드 전면 배치 제목)
-2. (브랜드명+키워드 전면 배치 제목)
-3. (브랜드명+키워드 전면 배치 제목)
-4. (브랜드명+키워드 전면 배치 제목)
-5. (브랜드명+키워드 전면 배치 제목)
-
--------------------------------------------------------
-
-[사진 1] 부터 [사진 {target_photos}] 까지 순서대로:
-
-[사진 번호]
-(촬영 가이드: {current_cat} 특성에 맞춘 촬영 가이드 /
-한 줄로 길어지지 않게 20~30자마다
-자연스럽게 엔터로 줄바꿈)
-
-[원고 텍스트]
-(1~2문장 단위로 줄바꿈을 적용한 30대 찐후기 텍스트 /
-가로로 길어지지 않게 25~35자마다 엔터 적용)
-
--------------------------------------------------------
-
-[필수 해시태그]
-{essential_tags if essential_tags else ''}
-"""
-                prompt_text = f"""
 다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {current_cat}], [사진 장수: 정확히 {target_photos}장], [SEO 25~35자 제목], [촬영가이드 및 본문 20~30자 줄바꿈], [구분선 유지], [시술명 금지], [~했다 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 카테고리: {current_cat}
 - 사진 장수: {target_photos}장
@@ -805,6 +719,7 @@ if generate_action:
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
 - 필수 해시태그: {essential_tags if essential_tags else '없음'}
+- 공식 계정 태그: {account_tags if account_tags else '없음'}
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
