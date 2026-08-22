@@ -29,70 +29,87 @@ if "event_info" not in st.session_state:
 if "content_mode" not in st.session_state:
     st.session_state.content_mode = "instagram"
 
-# 색상 강제 주입 글로벌 CSS
-is_insta_active = (st.session_state.content_mode == "instagram")
+# 모드 판별
+is_insta = (st.session_state.content_mode == "instagram")
 
+# 스타일 CSS 주입
 st.markdown(f"""
 <style>
-    /* 깔끔한 라미럽 메인 타이틀 */
-    .brand-title {{
-        font-size: 28px !important;
-        font-weight: 800 !important;
+    /* 상단 라미럽 타이틀 */
+    h1 {{
+        font-size: 32px !important;
+        font-weight: 900 !important;
         color: #111111 !important;
-        margin-bottom: 20px !important;
+        padding-top: 10px !important;
+        padding-bottom: 15px !important;
         letter-spacing: -0.5px !important;
     }}
 
-    /* 메인 2분할 탭 버튼 색상 강제 지정 */
+    /* 상단 모드 선택 버튼 2개 */
     div[data-testid="stHorizontalBlock"] > div:nth-child(1) button {{
-        background: {'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' if is_insta_active else '#f1f3f5'} !important;
-        color: {'#ffffff' if is_insta_active else '#495057'} !important;
+        background: {'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' if is_insta else '#f1f3f5'} !important;
+        color: {'#ffffff' if is_insta else '#495057'} !important;
         font-size: 18px !important;
         font-weight: 800 !important;
-        height: 52px !important;
-        border: {'none' if is_insta_active else '1px solid #ced4da'} !important;
-        border-radius: 10px !important;
-        box-shadow: {'0 4px 12px rgba(220, 39, 67, 0.35)' if is_insta_active else 'none'} !important;
+        height: 50px !important;
+        border: {'none' if is_insta else '1px solid #ced4da'} !important;
+        border-radius: 30px !important;
+        box-shadow: {'0 4px 12px rgba(220, 39, 67, 0.35)' if is_insta else 'none'} !important;
     }}
 
     div[data-testid="stHorizontalBlock"] > div:nth-child(2) button {{
-        background: {'#03C75A' if not is_insta_active else '#f1f3f5'} !important;
-        color: {'#ffffff' if not is_insta_active else '#495057'} !important;
+        background: {'#03C75A' if not is_insta else '#f1f3f5'} !important;
+        color: {'#ffffff' if not is_insta else '#495057'} !important;
+        font-size: 18px !important;
+        font-weight: 800 !important;
+        height: 50px !important;
+        border: {'none' if not is_insta else '1px solid #ced4da'} !important;
+        border-radius: 30px !important;
+        box-shadow: {'0 4px 12px rgba(3, 199, 90, 0.35)' if not is_insta else 'none'} !important;
+    }}
+
+    /* 중앙 생성하기 버튼 (원형 캡슐 디자인 + 슬림 폭) */
+    .round-btn-container {{
+        display: flex;
+        justify-content: center;
+        margin: 20px 0 30px 0;
+    }}
+    
+    .round-btn-container div[data-testid="stButton"] {{
+        width: 320px !important;
+    }}
+
+    .round-btn-container button {{
+        background: {
+            "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" 
+            if is_insta else "#03C75A"
+        } !important;
+        color: #ffffff !important;
         font-size: 18px !important;
         font-weight: 800 !important;
         height: 52px !important;
-        border: {'none' if not is_insta_active else '1px solid #ced4da'} !important;
-        border-radius: 10px !important;
-        box-shadow: {'0 4px 12px rgba(3, 199, 90, 0.35)' if not is_insta_active else 'none'} !important;
-    }}
-
-    /* 하단 대본/원고 생성 실행 버튼 색상 */
-    div[data-testid="stMainBlockContainer"] div.stButton > button[kind="primary"] {{
-        background: {
-            "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" 
-            if is_insta_active else "#03C75A"
-        } !important;
-        color: #ffffff !important;
-        font-size: 20px !important;
-        font-weight: 800 !important;
         border: none !important;
-        border-radius: 12px !important;
-        height: 56px !important;
+        border-radius: 50px !important;
         box-shadow: {
             "0 4px 15px rgba(220, 39, 67, 0.4)" 
-            if is_insta_active else "0 4px 15px rgba(3, 199, 90, 0.4)"
+            if is_insta else "0 4px 15px rgba(3, 199, 90, 0.4)"
         } !important;
+        transition: all 0.2s ease-in-out !important;
     }}
 
-    div.stButton > button:hover {{
-        opacity: 0.92 !important;
-        transform: translateY(-1px);
+    .round-btn-container button:hover {{
+        transform: translateY(-2px) !important;
+        box-shadow: {
+            "0 6px 20px rgba(220, 39, 67, 0.5)" 
+            if is_insta else "0 6px 20px rgba(3, 199, 90, 0.5)"
+        } !important;
+        opacity: 0.95 !important;
     }}
 </style>
 """, unsafe_allow_html=True)
 
-# 타이틀 출력
-st.markdown('<div class="brand-title">라미럽</div>', unsafe_allow_html=True)
+# 메인 타이틀
+st.title("라미럽")
 
 # API 클라이언트 초기화
 api_key = os.getenv("GEMINI_API_KEY")
@@ -226,7 +243,7 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [메인 영역: 심플 모드 선택 버튼] ====================
+# ==================== [메인 영역: 채널 선택 탭] ====================
 col1, col2 = st.columns(2)
 
 with col1:
@@ -239,12 +256,13 @@ with col2:
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
-
 # ==================== [선택된 모드에 따른 생성 실행] ====================
 
 if st.session_state.content_mode == "instagram":
-    generate_insta = st.button("인스타그램 대본 생성하기", type="primary", use_container_width=True, key="btn_insta_main")
+    # 둥근 캡슐형 생성 버튼 (중앙 정렬)
+    st.markdown('<div class="round-btn-container">', unsafe_allow_html=True)
+    generate_insta = st.button("인스타그램 대본 생성하기", key="btn_insta_main")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if generate_insta:
         if not brand_name or not product_usp:
@@ -387,7 +405,10 @@ if st.session_state.content_mode == "instagram":
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
 else:
-    generate_blog = st.button("블로그 원고 생성하기", type="primary", use_container_width=True, key="btn_blog_main")
+    # 둥근 캡슐형 생성 버튼 (중앙 정렬)
+    st.markdown('<div class="round-btn-container">', unsafe_allow_html=True)
+    generate_blog = st.button("블로그 원고 생성하기", key="btn_blog_main")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if generate_blog:
         if not brand_name or not product_usp:
