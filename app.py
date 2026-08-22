@@ -49,7 +49,7 @@ st.html(f"""
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }}
 
-    /* 2. 상단 탭: INSTAGRAM (비활성 시 20% 밝은 차콜그레이) */
+    /* 2. 상단 탭: INSTAGRAM (비활성 시 20% 밝은 톤) */
     .st-key-tab_insta button {{
         background: {insta_gradient if is_insta else '#484c54'} !important;
         border: {'2px solid #ff4b72' if is_insta else '1px solid #5a5f69'} !important;
@@ -64,7 +64,7 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 2. 상단 탭: BLOG (비활성 시 20% 밝은 차콜그레이) */
+    /* 2. 상단 탭: BLOG (비활성 시 20% 밝은 톤) */
     .st-key-tab_blog button {{
         background: {naver_green if not is_insta else '#484c54'} !important;
         border: {'2px solid #00ff6f' if not is_insta else '1px solid #5a5f69'} !important;
@@ -79,18 +79,8 @@ st.html(f"""
         letter-spacing: 1px !important;
     }}
 
-    /* 3. 하단 중앙 버튼 Flexbox 정중앙 강제 정렬 */
-    .heart-btn-wrapper {{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: 100% !important;
-        margin: 10px 0 20px 0 !important;
-    }}
-
-    .heart-btn-wrapper .st-key-btn_generate_main {{
-        width: 98px !important;
-        height: 98px !important;
+    /* 3. 하단 중앙 생성 버튼: Streamlit 자체 컨테이너 내 완벽 중앙 정렬 */
+    .st-key-btn_generate_main {{
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
@@ -112,19 +102,19 @@ st.html(f"""
         transition: all 0.25s ease-in-out !important;
         position: relative !important;
         padding: 0 !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         overflow: hidden !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }}
 
-    /* 버튼 텍스트 숨김 */
+    /* 버튼 내부 텍스트 숨김 */
     .st-key-btn_generate_main button * {{
         display: none !important;
     }}
 
-    /* 단 1개의 SVG 하트 정중앙 배치 */
+    /* SVG 단일 하트 정중앙 렌더링 */
     .st-key-btn_generate_main button::after {{
         content: "" !important;
         display: block !important;
@@ -302,7 +292,7 @@ def get_url_context():
             url_context += f"\n[제품 상세페이지 내용]: {p_text}\n"
     return url_context
 
-# ==================== [상단 채널 선택 탭 2개: 좌우 60% 슬림 중앙 정렬] ====================
+# ==================== [상단 채널 선택 탭 2개: [0.2, 0.3, 0.3, 0.2] 구조] ====================
 pad_left, tab_col1, tab_col2, pad_right = st.columns([0.2, 0.3, 0.3, 0.2])
 
 with tab_col1:
@@ -315,12 +305,13 @@ with tab_col2:
         st.session_state.content_mode = "blog"
         st.rerun()
 
-st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 25px;'></div>", unsafe_allow_html=True)
 
-# ==================== [완벽 수직축 정중앙 정렬 단일 하트 버튼] ====================
-st.markdown('<div class="heart-btn-wrapper">', unsafe_allow_html=True)
-generate_action = st.button("EXECUTE", key="btn_generate_main")
-st.markdown('</div>', unsafe_allow_html=True)
+# ==================== [하단 생성 버튼: 상단 탭과 동일한 중심축 [0.2, 0.6, 0.2] 구조로 완벽 정렬] ====================
+_, center_col, _ = st.columns([0.2, 0.6, 0.2])
+
+with center_col:
+    generate_action = st.button("EXECUTE", key="btn_generate_main")
 
 # ==================== [대본 / 원고 생성 로직] ====================
 if generate_action:
