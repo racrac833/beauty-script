@@ -261,41 +261,41 @@ st.markdown(f"""
 
     /* 7. 줄자형 눈금 마커(Tick Marks) 전용 컨테이너 */
     .ruler-tick-container {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 0 9px;
-        margin-top: 4px;
-        margin-bottom: 12px;
-        box-sizing: border-box;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0 9px !important;
+        margin-top: 4px !important;
+        margin-bottom: 14px !important;
+        box-sizing: border-box !important;
     }}
     .ruler-tick-item {{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
     }}
     .ruler-dot {{
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        background-color: #727783;
+        width: 4px !important;
+        height: 4px !important;
+        border-radius: 50% !important;
+        background-color: #727783 !important;
     }}
     .ruler-dot.active {{
-        background-color: {'#ff4b72' if is_insta else '#00ff6f'};
-        box-shadow: {'0 0 6px rgba(255, 75, 114, 0.8)' if is_insta else '0 0 6px rgba(0, 255, 111, 0.8)'};
-        transform: scale(1.3);
+        background-color: {'#ff4b72' if is_insta else '#00ff6f'} !important;
+        box-shadow: {'0 0 6px rgba(255, 75, 114, 0.8)' if is_insta else '0 0 6px rgba(0, 255, 111, 0.8)'} !important;
+        transform: scale(1.3) !important;
     }}
     .ruler-number {{
-        font-size: 11px;
-        font-weight: 700;
-        color: #8c92a0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #8c92a0 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }}
     .ruler-number.active {{
-        color: #ffffff;
-        font-weight: 900;
+        color: #ffffff !important;
+        font-weight: 900 !important;
     }}
 
     /* 8. 결과창 강조 헤더 & 눈에 띄는 설정값 뱃지 (Badge) */
@@ -546,40 +546,28 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # [완벽 해결] 슬라이더 + 줄자 눈금 점(마커) 및 숫자 1:1 완벽 정렬 렌더링
+    # [수정] 들여쓰기 공백 제거된 깨끗한 1:1 눈금바 렌더링
     if is_insta:
         st.slider("인스타 영상 장면 수", min_value=6, max_value=12, step=1, key="insta_scene_count")
         
-        # 6~12 줄자 눈금 마커 바 생성
-        tick_html = '<div class="ruler-tick-container">'
+        tick_items = []
         for val in range(6, 13):
             is_active = (val == st.session_state.insta_scene_count)
             dot_cls = "ruler-dot active" if is_active else "ruler-dot"
             num_cls = "ruler-number active" if is_active else "ruler-number"
-            tick_html += f'''
-            <div class="ruler-tick-item">
-                <div class="{dot_cls}"></div>
-                <div class="{num_cls}">{val}</div>
-            </div>
-            '''
-        tick_html += '</div>'
+            tick_items.append(f'<div class="ruler-tick-item"><div class="{dot_cls}"></div><div class="{num_cls}">{val}</div></div>')
+        tick_html = f'<div class="ruler-tick-container">{"".join(tick_items)}</div>'
         st.markdown(tick_html, unsafe_allow_html=True)
     else:
         st.slider("블로그 사진 장수", min_value=8, max_value=20, step=1, key="blog_photo_count")
         
-        # 8~20 줄자 눈금 마커 바 생성
-        tick_html = '<div class="ruler-tick-container">'
+        tick_items = []
         for val in range(8, 21):
             is_active = (val == st.session_state.blog_photo_count)
             dot_cls = "ruler-dot active" if is_active else "ruler-dot"
             num_cls = "ruler-number active" if is_active else "ruler-number"
-            tick_html += f'''
-            <div class="ruler-tick-item">
-                <div class="{dot_cls}"></div>
-                <div class="{num_cls}">{val}</div>
-            </div>
-            '''
-        tick_html += '</div>'
+            tick_items.append(f'<div class="ruler-tick-item"><div class="{dot_cls}"></div><div class="{num_cls}">{val}</div></div>')
+        tick_html = f'<div class="ruler-tick-container">{"".join(tick_items)}</div>'
         st.markdown(tick_html, unsafe_allow_html=True)
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
@@ -886,15 +874,8 @@ main_title = "인스타그램 대본" if is_insta else "블로그 원고"
 config_info = f"{st.session_state.product_category} · 장면 {st.session_state.insta_scene_count}개" if is_insta else f"{st.session_state.product_category} · 사진 {st.session_state.blog_photo_count}장"
 
 # 눈에 띄는 설정값 뱃지 렌더링
-st.markdown(f"""
-<div class="result-header-wrapper">
-    <span class="result-main-title">{main_title}</span>
-    <span class="result-config-badge">
-        <span class="dot"></span>
-        {config_info}
-    </span>
-</div>
-""", unsafe_allow_html=True)
+badge_html = f'<div class="result-header-wrapper"><span class="result-main-title">{main_title}</span><span class="result-config-badge"><span class="dot"></span>{config_info}</span></div>'
+st.markdown(badge_html, unsafe_allow_html=True)
 
 if current_result:
     st.code(current_result, language="markdown")
