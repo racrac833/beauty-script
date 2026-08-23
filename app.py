@@ -40,7 +40,7 @@ if "product_category" not in st.session_state:
 # 인스타 기본값: 6 (범위: 5~10)
 if "insta_scene_count" not in st.session_state:
     st.session_state.insta_scene_count = 6
-# 블로그 기본값: 15 (범위: 14~20)
+# 블로그 범위: 14~20 / 기본값: 15
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
@@ -880,8 +880,8 @@ if generate_action:
 """
                 contents = []
                 if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
+                    for img_file in uploaded_images:
+                        contents.append(Image.open(img_file))
                 contents.append(prompt_text)
 
                 try:
