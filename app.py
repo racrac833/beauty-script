@@ -254,7 +254,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 7. 슬라이더 바 및 핸들 테마 동기화 (인스타/블로그 완벽 분기 적용) */
+    /* 7. 슬라이더 바 및 핸들 테마 동기화 (블로그 네이버 그린 완벽 적용) */
     div[data-testid="stSlider"] {{
         margin-bottom: 14px !important;
     }}
@@ -267,7 +267,7 @@ st.markdown(f"""
         height: 6px !important;
         border-radius: 4px !important;
     }}
-    /* 바 채움 색상 강제 지정 */
+    /* 바 채움 색상 강제 지정 (네이버 그린 / 인스타 그라데이션) */
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div,
     div[data-testid="stSlider"] [data-baseweb="slider"] div[role="presentation"] div {{
         background: {slider_fill_color} !important;
@@ -780,6 +780,10 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
