@@ -37,16 +37,9 @@ if "blog_result" not in st.session_state:
 if "product_category" not in st.session_state:
     st.session_state.product_category = "기초/스킨케어"
 
-# 인스타 기본값: 6 (범위: 5~10)
-if "insta_scene_count" not in st.session_state:
-    st.session_state.insta_scene_count = 6
-# 블로그 기본값: 15 (범위: 14~20)
-if "blog_photo_count" not in st.session_state:
-    st.session_state.blog_photo_count = 15
-
 generate_action = False
 
-# ==================== [2. 테마 컬러 및 기본 슬라이더 스타일링] ====================
+# ==================== [2. 테마 컬러 및 기본 스타일링] ====================
 is_insta = (st.session_state.content_mode == "instagram")
 insta_gradient = "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)"
 naver_green = "#03C75A"
@@ -200,7 +193,7 @@ st.markdown(f"""
         font-weight: 900 !important;
     }}
 
-    /* 4. 사이드바 내부 RAMILOVE 로고 스타일 (간격 50% 확장) */
+    /* 4. 사이드바 내부 RAMILOVE 로고 스타일 */
     .sidebar-logo {{
         font-size: 26px !important;
         font-weight: 900 !important;
@@ -254,36 +247,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 7. 슬라이더 바 */
-    div[data-testid="stSlider"] {{
-        margin-bottom: 14px !important;
-    }}
-    div[data-testid="stSlider"] div[data-baseweb="slider"] {{
-        margin-top: 6px !important;
-        margin-bottom: 6px !important;
-    }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child {{
-        background-color: #383c46 !important;
-        height: 6px !important;
-        border-radius: 4px !important;
-    }}
-    div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div {{
-        background: {slider_fill_color} !important;
-    }}
-    div[data-testid="stSlider"] div[role="slider"] {{
-        background: {slider_fill_color} !important;
-        border: 2.5px solid #ffffff !important;
-        width: 18px !important;
-        height: 18px !important;
-        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.8)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.8)'} !important;
-    }}
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
-    div[data-testid="stSlider"] [data-testid="stSliderTickBar"] {{
-        display: none !important;
-    }}
-
-    /* 8. 결과창 헤더 뱃지 및 기울임꼴 절대 금지 */
+    /* 7. 결과창 헤더 뱃지 및 기울임꼴 절대 금지 */
     em, i, * {{
         font-style: normal !important;
     }}
@@ -323,7 +287,7 @@ st.markdown(f"""
         display: inline-block;
     }}
 
-    /* 9. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
+    /* 8. 결과창 코드 블록 자동 줄바꿈 & 대형 복사 버튼 */
     .stCodeBlock {{
         position: relative !important;
         border-radius: 14px !important;
@@ -544,9 +508,6 @@ with st.sidebar:
                     st.session_state.event_info = data.get("event_info", "")
                     
                     st.success("분석 완료! 아래 추출된 내용을 확인하고 필요시 수정해주세요.")
-                    
-                    if (g_crawl_fail or p_crawl_fail) and not uploaded_images:
-                        st.info("팁: 앱 전용 웹뷰(오늘룩)나 일부 쇼핑몰은 웹 보안상 링크 직접 읽기가 제한됩니다. 가이드 화면을 캡처해서 상단 파일 첨부에 올리시면 완벽하게 인식됩니다.")
                 except Exception as e:
                     st.error(f"분석 중 오류가 발생했습니다: {e}")
 
@@ -555,11 +516,6 @@ with st.sidebar:
     
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
-
-    if is_insta:
-        st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, value=st.session_state.insta_scene_count, step=1, key="insta_scene_count")
-    else:
-        st.slider("블로그 사진 장수 (14~20장)", min_value=14, max_value=20, value=st.session_state.blog_photo_count, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_name = st.text_input("정확한 제품명 (임의 변경 절대 금지)", value=st.session_state.product_name)
@@ -595,41 +551,38 @@ if generate_action:
                 contents.append(Image.open(img))
 
         if is_insta:
-            target_scenes = st.session_state.insta_scene_count
             current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 맞춤 장면 {target_scenes}개 구성의 릴스 콘티를 작성 중입니다..."):
+            with st.spinner(f"[{current_cat}] 가이드라인 기준 맞춤형 릴스 콘티를 작성 중입니다..."):
                 system_instruction_reels = f"""
 [Role & Goal]
-당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
-사용자가 제공하는 [가이드라인 이미지/텍스트, 브랜드명: {brand_name}, 제품명: {product_name}, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안, 카테고리: {current_cat}, 장면 수: {target_scenes}개]를 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
+당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가입니다.
+사용자가 제공하는 [가이드라인 이미지/텍스트, 브랜드명: {brand_name}, 제품명: {product_name}, 제품 USP, 이벤트 정보, 카테고리: {current_cat}]를 완벽히 분석하여, 가이드라인의 요구사항에 맞게 최적의 장면 수(자율 구성)를 설정하고 고품질 촬영 콘티를 작성합니다.
 
 [핵심 절대 원칙 (CRITICAL)]
 
-1. [가로 스크롤 방지 줄바꿈 규칙 (STRICT)]:
-- 모든 텍스트(썸네일 설명, 씬별 연출 컷 설명, 나레이션 문장, 광고 캡션, 썸네일 재요약, 장면 요약, 나레이션만 정리를 포함한 모든 하단 요약 섹션)는 한 줄 쓰기를 절대 금지하며, 워드 기본 폰트 기준 화면에서 가로 스크롤이 생기지 않도록 적당한 길이에서 엔터(줄바꿈)를 쳐서 작성하세요.
+1. [장면 수 자율 생성 원칙]:
+- 인스타 씬 개수를 고정하지 말고, 제공된 가이드라인과 제품 USP를 가장 효과적으로 전달할 수 있도록 최적의 장면 수로 구성하세요.
 
-2. [나레이션 2줄 작성 규칙 (STRICT)]:
-- 장면마다 있는 각 `나레이션：` 항목은 반드시 문장 단위로 나누어 2줄(2개의 줄바꿈 구조)로 작성하세요.
+2. [나레이션 분량 엄수]:
+- 전체 나레이션 총합 분량은 **공백 포함 280자 ~ 300자 내외**를 엄격히 준수하세요.
 
-3. [기울임꼴(Italic) 절대 금지 (STRICT)]:
-- 모든 출력 텍스트에 마크다운 이탤릭 기호(* 또는 _)를 사용하여 글씨를 기울이지 마세요. 모든 글씨체는 기본 정체(Normal)로만 출력합니다.
+3. [가로 스크롤 방지 줄바꿈 규칙 (STRICT)]:
+- 모든 텍스트는 한 줄 쓰기를 금지하며, 적당한 길이에서 엔터(줄바꿈)를 쳐서 가로 스크롤이 생기지 않게 하세요.
 
-4. [인스타그램 자막 및 브랜드명 표기 규칙 (STRICT)]:
-- 자막에는 절대 서술형(~합니다, ~해요 등)을 쓰지 말고, 오직 나레이션의 핵심 내용을 압축한 '명사형/요약형 단문'으로만 구성하세요.
-- 나레이션의 흐름이 AB 구조라면 자막 역시 반드시 A / B 순서와 구조를 정확히 일치시켜야 합니다.
-- 자막 내 컷 구분은 한 줄에 슬래시를 쓰지 않고, 반드시 줄바꿈하여 단독 줄로 슬래시(`/`)를 배치하세요.
+4. [기울임꼴(Italic) 절대 금지 (STRICT)]:
+- 마크다운 이탤릭 기호(* 또는 _)를 사용하지 말고 모든 글씨체는 기본 정체로만 출력하세요.
+
+5. [인스타그램 자막 및 브랜드명 표기 규칙 (STRICT)]:
+- 자막에는 서술형(~합니다 등)을 쓰지 않고 오직 나레이션의 핵심 내용을 압축한 명사형/요약형 단문으로 구성하세요.
+- 자막 내 컷 구분은 줄바꿈하여 단독 줄로 슬래시(`/`)를 배치하세요.
 - 나레이션에서 브랜드명과 제품명이 모두 언급될 때만 자막에 `[브랜드명](로고 삽입) [제품명] 사용` 형태로 표기합니다.
 
-5. [나레이션 톤앤매너 및 구조 규칙 (STRICT)]:
-- 나레이션은 30대 여성이 실제로 사용해보고 솔직하게 공유하는 자연스럽고 친근한 리얼 후기 어투(~해봤는데요 등)로 작성합니다.
-- 느낌표(!), 슬래시(/) 등 어떠한 특수문자나 기호도 절대 포함하지 않습니다.
-- 전체 나레이션 총합 분량은 공백 포함 280자 ~ 300자 내외로 타이트하게 작성합니다.
+6. [나레이션 톤앤매너]:
+- 30대 여성이 실제로 사용해보고 솔직하게 공유하는 자연스러운 찐후기 어조(~해봤는데요 등)를 사용하세요.
+- 느낌표(!), 슬래시(/) 등 특수문자나 기호를 대사 내에 포함하지 마세요.
 
-6. [브랜드명 및 고유 명칭 왜곡 절대 금지 (STRICT)]:
-- 브랜드명({brand_name})과 제품명({product_name}), 라인명, 수치 등은 원형 그대로 100% 동일하게 유지합니다.
-
-7. [해시태그 임의 생성/추가 절대 금지 (STRICT)]:
-- 가이드라인/초안에 지정된 '필수 해시태그' 외에는 단 1개의 연관/추천/일반 해시태그도 임의로 추가하지 않습니다.
+7. [브랜드명 및 해시태그 원형 유지]:
+- 브랜드명({brand_name})과 제품명({product_name}) 원형을 100% 유지하고, 지정된 필수 해시태그 외에 임의 해시태그를 추가하지 마세요.
 
 [출력 양식 템플릿]
 썸네일
@@ -656,7 +609,7 @@ if generate_action:
 두 번째 나레이션 문장
 
 -------------------------------------------------------
-(선택된 장면 수 `{target_scenes}개`에 맞춰 마지막 씬까지 반복)
+(가이드라인에 맞춘 최적의 씬 개수만큼 '### [2. 장면]' 형식으로 순차적 반복)
 
 하단 구성 요소 및 장면 요약
 주의점 / 필수 표기 사항 / 브랜드 공식 로고 삽입 안내 / 음원 저작권 및 심의 유의사항
@@ -667,9 +620,8 @@ if generate_action:
 나레이션만 정리
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 템플릿 규칙([카테고리: {current_cat}], [장면 수: {target_scenes}개], [브랜드명: {brand_name}], [제품명: {product_name}], [가로 스크롤 방지 줄바꿈], [기울임꼴 금지])을 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
+다음 정보를 바탕으로 위 템플릿 규칙([카테고리: {current_cat}], [가이드 기반 자율 장면 생성], [나레이션 총합 공백포함 280~300자], [브랜드명: {brand_name}], [제품명: {product_name}], [가로 스크롤 방지 줄바꿈], [기울임꼴 금지])을 100% 지켜 인스타그램 숏폼 대본을 작성해줘:
 - 카테고리: {current_cat}
-- 장면 수: {target_scenes}개 씬
 - 브랜드명: {brand_name}
 - 제품명: {product_name}
 - 제품 USP: {product_usp}
@@ -696,26 +648,23 @@ if generate_action:
                     st.error(f"대본 생성 중 오류가 발생했습니다: {e}")
 
         else:
-            target_photos = st.session_state.blog_photo_count
             current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 맞춤 사진 {target_photos}장 기준 네이버 SEO 블로그 원고를 작성 중입니다..."):
+            with st.spinner(f"[{current_cat}] 가이드라인 맞춤 네이버 SEO 블로그 원고를 작성 중입니다..."):
                 system_instruction_blog = f"""
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
-사용자가 제공한 [카테고리: {current_cat}, 사진 장수: {target_photos}장, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
+사용자가 제공한 [카테고리: {current_cat}, 가이드라인, 제품 상세페이지 내용, USP, 행사 정보]를 분석하여 네이버 블로그 검색 알고리즘과 스마트블록에 최적화된 고품질 포스팅 원고를 작성합니다.
 
 [네이버 블로그 SEO 및 분량 핵심 원칙 (CRITICAL)]
-1. [글자 수 기준 (STRICT)]:
-- 본문 총분량은 **공백을 제외하고 1,500자 ~ 2,000자 사이**를 엄격히 준수하세요.
-- 슬라이더로 설정한 사진 장수({target_photos}장)에 비례하여, 14장에 가까울수록 1,500자에 맞추고 20장에 가까울수록 2,000자에 가깝도록 상세하고 풍성하게 분량을 조절하여 작성하세요.
+1. [사진 장수 자율 생성 원칙]:
+- 사진 장수를 고정하지 말고, 제공된 가이드라인 내용과 제품 USP를 가장 자연스럽고 설득력 있게 전달할 수 있도록 최적의 사진 개수(예: 12~18장 등 자율 구성)로 [사진 1]부터 순차적으로 생성하세요.
 
-2. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT)]:
+2. [글자 수 기준 (STRICT)]:
+- 본문 총분량은 **공백을 제외하고 1,500자 ~ 2,000자 사이**를 엄격히 준수하세요.
+
+3. [촬영 가이드 및 본문 줄바꿈 원칙 (STRICT)]:
 - (촬영 가이드: ...) 설명은 한 줄로 길게 늘어지지 않게 20~30자 내외마다 엔터(줄바꿈)를 쳐서 작성하세요.
 - 본문 [원고 텍스트] 역시 1줄당 25~35자 내외로 자연스럽게 엔터를 쳐서 작성하세요. (가로 스크롤 절대 방지)
-
-3. [사진 장수 정확히 {target_photos}장 구성 (STRICT)]:
-- 반드시 [사진 1]부터 [사진 {target_photos}]까지 정확히 {target_photos}개의 사진 가이드와 원고 문단으로 분절하여 작성하세요.
-- 제형, 발림성, 롤링, 사용 과정 등이 담기는 사진 1~2곳에는 체류시간 증대를 위해 '[GIF 권장]'을 포함하세요.
 
 4. [네이버 SEO 최적화 제목 (공백 포함 25~35자 내외)]:
 - [브랜드명 + 핵심 키워드 + 제품군]을 앞단(15자 이내)에 배치한 제목 5선을 추천합니다.
@@ -731,13 +680,13 @@ if generate_action:
 
 -------------------------------------------------------
 
-[사진 1] 부터 [사진 {target_photos}] 까지 순서대로:
+[사진 1] 부터 가이드 맞춤 마지막 사진까지 순서대로:
 
 [사진 번호]
 (촬영 가이드: {current_cat} 특성에 맞춘 촬영 가이드 / 줄바꿈 적용)
 
 [원고 텍스트]
-(줄바꿈을 적용한 30대 찐후기 텍스트 / 공백 제외 목표 글자수에 맞게 풍성하게 기술)
+(줄바꿈을 적용한 30대 찐후기 텍스트 / 공백 제외 1500~2000자 목표 분량 준수)
 
 -------------------------------------------------------
 
@@ -745,9 +694,8 @@ if generate_action:
 {essential_tags if essential_tags else ''}
 """
                 prompt_text = f"""
-다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {current_cat}], [사진 장수: 정확히 {target_photos}장], [공백 제외 글자수 1500~2000자 비례 조절], [SEO 25~35자 제목], [촬영가이드 및 본문 줄바꿈], [시술명 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
+다음 정보를 바탕으로 위 블로그 템플릿 규칙([카테고리: {current_cat}], [가이드 기반 자율 사진 생성], [공백 제외 글자수 1500~2000자 내외], [SEO 25~35자 제목], [촬영가이드 및 본문 줄바꿈], [시술명 금지])을 100% 지켜 네이버 블로그 원고를 작성해줘:
 - 카테고리: {current_cat}
-- 사진 장수: {target_photos}장 (슬라이더 설정에 맞춰 1500~2000자 범위 내에서 비례하여 상세히 작성)
 - 브랜드명: {brand_name}
 - 제품명: {product_name}
 - 제품 USP: {product_usp}
@@ -777,10 +725,10 @@ if generate_action:
                 except Exception as e:
                     st.error(f"블로그 원고 생성 중 오류가 발생했습니다: {e}")
 
-# ==================== [6. 결과 화면: 눈에 띄는 설정값 뱃지 UI] ====================
+# ==================== [6. 결과 화면: 설정값 뱃지 UI] ====================
 current_result = st.session_state.insta_result if is_insta else st.session_state.blog_result
 main_title = "인스타그램 대본" if is_insta else "블로그 원고"
-config_info = f"{st.session_state.product_category} · 장면 {st.session_state.insta_scene_count}개" if is_insta else f"{st.session_state.product_category} · 사진 {st.session_state.blog_photo_count}장"
+config_info = f"{st.session_state.product_category} · 가이드 맞춤 구성"
 
 badge_html = f'<div class="result-header-wrapper"><span class="result-main-title">{main_title}</span><span class="result-config-badge"><span class="dot"></span>{config_info}</span></div>'
 st.markdown(badge_html, unsafe_allow_html=True)
