@@ -557,7 +557,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 적용 (인스타 장면 수 5 ~ 10장, 기본값 6장)
+    # 슬라이더 적용 (인스타 5~10장 / 블로그 14~20장, 기본값 15장)
     if is_insta:
         st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, step=1, key="insta_scene_count")
     else:
