@@ -40,7 +40,7 @@ if "product_category" not in st.session_state:
 # 인스타 기본값: 6 (범위: 5~10)
 if "insta_scene_count" not in st.session_state:
     st.session_state.insta_scene_count = 6
-# 블로그 범위: 14~20 / 기본값: 15
+# 블로그 기본값: 15 (범위: 14~20)
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
@@ -557,7 +557,7 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 적용 (인스타 5~10장, 기본값 6장 / 블로그 14~20장, 기본값 15장)
+    # 슬라이더 적용 (인스타 5~10장, 기본 6장 / 블로그 14~20장, 기본 15장)
     if is_insta:
         st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, step=1, key="insta_scene_count")
     else:
@@ -880,8 +880,8 @@ if generate_action:
 """
                 contents = []
                 if uploaded_images:
-                    for img_file in uploaded_images:
-                        contents.append(Image.open(img_file))
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
