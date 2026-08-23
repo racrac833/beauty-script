@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
@@ -420,6 +421,28 @@ def fetch_url_content(url):
     except Exception:
         return ""
 
+def call_gemini_with_retry(contents, config, max_retries=3):
+    """
+    503 UNAVAILABLE(과부하) 또는 일시적 네트워크 에러 발생 시 
+    최대 3번까지 대기(Sleep) 후 자동으로 재시도하는 안전장치 함수
+    """
+    delay = 2
+    for attempt in range(max_retries):
+        try:
+            return client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=contents,
+                config=config
+            )
+        except Exception as e:
+            error_str = str(e)
+            if ("503" in error_str or "UNAVAILABLE" in error_str or "high demand" in error_str) and attempt < max_retries - 1:
+                time.sleep(delay)
+                delay *= 2  # 지연 시간 점진적 증가 (Backoff)
+                continue
+            else:
+                raise e
+
 def validate_and_fix_result(text, brand, product):
     """
     파이썬 강제 후처리 검증 엔진:
@@ -431,7 +454,6 @@ def validate_and_fix_result(text, brand, product):
     if not text:
         return text
 
-    # 마크다운 볼드체(**) 제거
     text = text.replace("**", "")
 
     lines = text.split('\n')
@@ -441,7 +463,6 @@ def validate_and_fix_result(text, brand, product):
     for line in lines:
         stripped = line.strip()
         
-        # 썸네일 영역은 띄어쓰기 및 글자 수 보호
         if "[베스트 썸네일]" in line or "[추천 썸네일 문구 9선]" in line:
             in_thumbnail_section = True
             processed_lines.append(line)
@@ -453,7 +474,6 @@ def validate_and_fix_result(text, brand, product):
             processed_lines.append(line)
             continue
 
-        # 해시태그 영역 세로 정렬
         if stripped.startswith('#') and ' ' in stripped:
             tags = re.findall(r'#[\w\d가-힣]+', stripped)
             if len(tags) > 1:
@@ -461,7 +481,6 @@ def validate_and_fix_result(text, brand, product):
                     processed_lines.append(t)
                 continue
 
-        # 공백 제외 30자 이상 시 강제 줄바꿈 삽입
         no_space_len = len(stripped.replace(" ", ""))
         if no_space_len > 30 and not stripped.startswith('http') and not stripped.startswith('-') and not stripped.startswith('[사진'):
             parts = re.split(r'(?<=[.?!])\s+|(?<=[고서며데네죠요])\s+', stripped)
@@ -537,8 +556,7 @@ with st.sidebar:
                 contents.append(extract_prompt)
 
                 try:
-                    response = client.models.generate_content(
-                        model="gemini-3.6-flash",
+                    response = call_gemini_with_retry(
                         contents=contents,
                         config=types.GenerateContentConfig(
                             response_mime_type="application/json",
@@ -562,7 +580,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
-    categories = ["기초/스킨케어", "색조/메이크업", "선케/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
+    categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
@@ -595,7 +613,7 @@ if generate_action:
 
         if is_insta:
             current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 가이드라인 필수 항목 반영 맞춤형 릴스 콘티를 작성 중입니다..."):
+            with st.spinner(f"[{current_cat}] 가이드라인 필수 항목 반영 맞춤형 릴스 콘티를 작성 중입니다 (서버 과부하 자동 재시도 적용)..."):
                 system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가입니다.
@@ -710,15 +728,14 @@ if generate_action:
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
 - 필수 해시태그: {essential_tags if essential_tags else '없음'}
-- 공식 계정 태그: {account_tags if account_tags else '@공식계정아이디'}
+- 공식 계정 태그: {account_tags if account_tags else '@vtcosmetics_official'}
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
                 contents.append(prompt_text)
 
                 try:
-                    response = client.models.generate_content(
-                        model="gemini-3.6-flash",
+                    response = call_gemini_with_retry(
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction_reels,
@@ -732,7 +749,7 @@ if generate_action:
 
         else:
             current_cat = st.session_state.product_category
-            with st.spinner(f"[{current_cat}] 가이드라인 필수 항목 반영 네이버 SEO 블로그 원고를 작성 중입니다 (15~20컷 구성)..."):
+            with st.spinner(f"[{current_cat}] 가이드라인 필수 항목 반영 네이버 SEO 블로그 원고를 작성 중입니다 (15~20컷 구성 / 서버 과부하 자동 재시도 적용)..."):
                 system_instruction_blog = f"""
 [Role & Goal]
 당신은 네이버 상위 노출 전문 뷰티 블로거이자 전문 에디터입니다.
@@ -827,8 +844,7 @@ if generate_action:
                 contents.append(prompt_text)
 
                 try:
-                    response = client.models.generate_content(
-                        model="gemini-3.6-flash",
+                    response = call_gemini_with_retry(
                         contents=contents,
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction_blog,
