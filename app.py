@@ -40,7 +40,7 @@ if "product_category" not in st.session_state:
 # 인스타 기본값: 6 (범위: 5~10)
 if "insta_scene_count" not in st.session_state:
     st.session_state.insta_scene_count = 6
-# 블로그 기본값: 15 (범위: 15~20)
+# 블로그 기본값: 15 (범위: 14~20)
 if "blog_photo_count" not in st.session_state:
     st.session_state.blog_photo_count = 15
 
@@ -557,11 +557,11 @@ with st.sidebar:
     categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 적용 (인스타 5~10장 / 블로그 15~20장, 기본값 15장)
+    # 슬라이더 적용 (인스타 5~10장, 기본값 6장 / 블로그 14~20장, 기본값 15장)
     if is_insta:
         st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, step=1, key="insta_scene_count")
     else:
-        st.slider("블로그 사진 장수 (15~20장)", min_value=15, max_value=20, step=1, key="blog_photo_count")
+        st.slider("블로그 사진 장수 (14~20장)", min_value=14, max_value=20, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_name = st.text_input("정확한 제품명 (임의 변경 절대 금지)", value=st.session_state.product_name)
@@ -774,6 +774,10 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
+                contents = []
+                if uploaded_images:
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
