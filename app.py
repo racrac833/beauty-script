@@ -16,6 +16,8 @@ st.set_page_config(page_title="RAMILOVE", layout="wide")
 # ==================== [1. 세션 상태 초기화] ====================
 if "brand_name" not in st.session_state:
     st.session_state.brand_name = ""
+if "product_name" not in st.session_state:
+    st.session_state.product_name = ""
 if "product_usp" not in st.session_state:
     st.session_state.product_usp = ""
 if "target_audience" not in st.session_state:
@@ -422,6 +424,7 @@ client = genai.Client(api_key=api_key)
 
 class ExtractedGuide(BaseModel):
     brand_name: str = Field(description="가이드/상세페이지에서 소개하는 실제 화장품/뷰티 브랜드명")
+    product_name: str = Field(description="실제 제품의 정확한 제품명 또는 라인명")
     product_usp: str = Field(description="실제 제품의 핵심 USP, 제형 특성, 주요 성분 및 효과 요약")
     target_audience: str = Field(description="타겟층 정보 (기본: 30대 여성)")
     essential_tags: str = Field(description="가이드에 명시된 필수 해시태그 목록 (#포함)")
@@ -508,7 +511,7 @@ with st.sidebar:
 
 [절대 주의사항 (STRICT)]
 1. '오늘룩(oneulook)', '레뷰(revu)', '체험단' 등은 마케팅 중개 플랫폼일 뿐 실제 화장품 브랜드명이 아닙니다. 절대 이를 브랜드명이나 해시태그로 추출하지 마세요.
-2. 이미지와 상세페이지에 나오는 '실제 뷰티 제품의 브랜드명(예: 엑시스와이, 넘버즈인, 아누아 등)'과 '제품명'을 정확히 추출하세요.
+2. 이미지와 상세페이지에 나오는 '실제 뷰티 제품의 브랜드명(예: 엑시스와이, 넘버즈인, 아누아 등)'과 '정확한 제품명'을 정확히 추출하세요.
 3. 제품 USP: 제품의 실제 성분, 제형 특성, 고민 부위 해결 효과, 임상시험 수치 추출
 4. 행사 정보: 올리브영 프로모션 일정, 할인율/가격, 구매처 추출
 5. 필수 해시태그: 가이드에 지정된 실제 제품 필수 해시태그만 추출 (플랫폼 태그 제외)
@@ -530,6 +533,7 @@ with st.sidebar:
                     )
                     data = json.loads(response.text)
                     st.session_state.brand_name = data.get("brand_name", "")
+                    st.session_state.product_name = data.get("product_name", "")
                     st.session_state.product_usp = data.get("product_usp", "")
                     st.session_state.target_audience = data.get("target_audience", "30대 여성")
                     st.session_state.essential_tags = data.get("essential_tags", "")
@@ -557,6 +561,7 @@ with st.sidebar:
         st.slider("블로그 사진 장수 (15~20장)", min_value=15, max_value=20, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
+    product_name = st.text_input("정확한 제품명 (임의 변경 절대 금지)", value=st.session_state.product_name)
     product_usp = st.text_area("제품 USP / 주요 특징", value=st.session_state.product_usp, height=100)
     event_info = st.text_area("행사 / 가격 / 기획전 정보 (일정, 할인내용)", value=st.session_state.event_info, height=70)
     target_audience = st.text_input("타겟층", value=st.session_state.target_audience)
@@ -595,7 +600,7 @@ if generate_action:
                 system_instruction_reels = f"""
 [Role & Goal]
 당신은 숏폼(릴스/쇼츠/틱톡) 뷰티 콘텐츠 전문 콘티 작가 "뷰티 릴스 대본 작성기"입니다.
-사용자가 제공하는 [가이드라인 이미지/텍스트, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안, 카테고리: {current_cat}, 장면 수: {target_scenes}개]를 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
+사용자가 제공하는 [가이드라인 이미지/텍스트, 브랜드명: {brand_name}, 제품명: {product_name}, 제품 USP, 이벤트/공구/기획전 정보, 대본 초안, 카테고리: {current_cat}, 장면 수: {target_scenes}개]를 완벽히 분석하여, 디테일·톤앤매너·핵심 소구점과 후반부 행사/가격 정보까지 100% 누락 없이 반영한 고품질 촬영 콘티를 작성합니다.
 
 [핵심 절대 원칙 (CRITICAL)]
 
@@ -608,11 +613,11 @@ if generate_action:
 3. [기울임꼴(Italic) 절대 금지 (STRICT)]:
 - 모든 출력 텍스트에 마크다운 이탤릭 기호(* 또는 _)를 사용하여 글씨를 기울이지 마세요. 모든 글씨체는 기본 정체(Normal)로만 출력합니다. ((하단 각주 삽입) 등 안내 문구도 절대 기울이지 말고 일반 정체로 출력)
 
-4. [인스타그램 자막 작성 규칙 (STRICT)]:
+4. [인스타그램 자막 및 브랜드명 표기 규칙 (STRICT)]:
 - 자막에는 절대 서술형(~합니다, ~해요 등)을 쓰지 말고, 오직 나레이션의 핵심 내용을 압축한 '명사형/요약형 단문'으로만 구성하세요.
 - 나레이션의 흐름이 AB 구조라면 자막 역시 반드시 A / B 순서와 구조를 정확히 일치시켜야 합니다 (나레이션이 AB인데 자막이 BA가 되는 것은 절대 금지).
 - 자막 내 컷 구분은 한 줄에 슬래시를 쓰지 않고, 반드시 줄바꿈하여 단독 줄로 슬래시(`/`)를 배치하세요.
-- 나레이션에서 브랜드명(A)과 제품명(B)이 언급될 때 자막에는 반드시 `[브랜드명](로고 삽입) B 사용` 형태로 표기하세요 (예: `엑시스와이(로고 삽입) 비건 콜라겐 아이 세럼 사용`).
+- **[매우 중요]**: 나레이션에서 브랜드명과 제품명이 모두 언급될 때만 자막에 `[브랜드명](로고 삽입) [제품명] 사용` 형태로 표기합니다. 만약 나레이션에 제품명만 언급되고 브랜드명이 언급되지 않았다면 `[브랜드명](로고 삽입)` 형태를 절대 사용하지 말고 제품명 단독 또는 관련 문구만 자막에 표기하세요.
 - 비포/애프터 장면이 포함된 씬에서는 카메라 앵글에 "비포&애프터 비교 컷"을 기재하고, 자막에 "비포 애프터"를 표기하세요.
 - 각주가 있는 경우, A* (하단 각주 삽입) *각주내용 형식으로, ABC 중에서 A가 각주 해당 단어라면 A에 * 표시하고, A*에 대한 각주내용은 또다시 *를 맨 앞에 쓰고 각주내용을 작성하세요. 절대 슬래시 다음 문장 밑에 각주를 달지 마세요.
 
@@ -623,7 +628,7 @@ if generate_action:
 - 전체 나레이션 총합 분량은 공백 포함 280자 ~ 300자 내외로 타이트하게 작성합니다.
 
 6. [브랜드명 및 고유 명칭 왜곡 절대 금지 (STRICT)]:
-- 브랜드명(한글/영문/표기법 일체)과 제품명, 라인명, 수치, 소재 등은 원형 그대로 100% 동일하게 유지합니다.
+- 브랜드명({brand_name})과 제품명({product_name}), 라인명, 수치, 소재 등은 원형 그대로 100% 동일하게 유지합니다.
 
 7. [해시태그 임의 생성/추가 절대 금지 (STRICT)]:
 - 가이드라인/초안에 지정된 '필수 해시태그' 외에는 단 1개의 연관/추천/일반 해시태그도 임의로 추가하지 않습니다.
@@ -686,7 +691,7 @@ if generate_action:
 카메라 앵글 → 인물 행동 → 제품 포인트 연출 흐름 (가로 스크롤 방지 줄바꿈 적용)
 
 자막：
-(서술형 금지 / 나레이션 요약형 단문 / 나레이션 AB 순서와 A / B 자막 순서 완벽 일치 / 브랜드명 포함 시 [브랜드명](로고 삽입) 제품명 사용 표기 / 슬래시는 단독 줄 배치)
+(서술형 금지 / 나레이션 요약형 단문 / 나레이션 AB 순서와 A / B 자막 순서 완벽 일치 / 나레이션에 브랜드+제품 동시 언급 시에만 [브랜드명](로고 삽입) [제품명] 사용 표기 / 슬래시는 단독 줄 배치)
 자막 요약 첫 문장
 /
 자막 요약 둘째 문장
@@ -753,10 +758,11 @@ if generate_action:
 (전체 씬의 나레이션을 순서대로 모아서 출력 / 전체 글자 수: 공백 포함 280자 ~ 300자 엄수 / 한 줄로 길게 출력되지 않도록 문장 단위로 줄바꿈 적용)
 """
                 prompt_text = f"""
-사용자가 제공한 원본 젬스 프롬프트의 모든 절대 원칙과 추가 규칙([모든 텍스트 가로 스크롤 방지 줄바꿈], [나레이션은 반드시 2줄로 작성], [기울임꼴 절대 금지], [자막 서술형 금지 및 나레이션 요약], [나레이션 AB와 자막 A/B 순서 일치], [~해봤는데요 부드러운 톤], [브랜드/제품 언급 시 자막에 [브랜드명](로고 삽입) B 사용 표기], [각주는 A* (하단 각주 삽입) *각주내용 형식 엄수], [하단 구성요소 및 요약 섹션 모두 줄바꿈 필수], [인스타 장면 수 {target_scenes}개])을 100% 준수하여 인스타그램 숏폼 대본을 작성해줘:
+사용자가 제공한 원본 젬스 프롬프트의 모든 절대 원칙과 추가 규칙([모든 텍스트 가로 스크롤 방지 줄바꿈], [나레이션은 반드시 2줄로 작성], [기울임꼴 절대 금지], [자막 서술형 금지 및 나레이션 요약], [나레이션 AB와 자막 A/B 순서 일치], [~해봤는데요 부드러운 톤], [나레이션에 브랜드+제품 동시 언급 시에만 자막에 [브랜드명](로고 삽입) 제품명 사용 표기], [각주는 A* (하단 각주 삽입) *각주내용 형식 엄수], [하단 구성요소 및 요약 섹션 모두 줄바꿈 필수], [인스타 장면 수 {target_scenes}개])을 100% 준수하여 인스타그램 숏폼 대본을 작성해줘:
 - 카테고리: {current_cat}
 - 장면 수: {target_scenes}개 씬
 - 브랜드명: {brand_name}
+- 제품명: {product_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
@@ -856,6 +862,7 @@ if generate_action:
 - 카테고리: {current_cat}
 - 사진 장수: {target_photos}장 (공백 포함 총 분량 최소 1500자 이상으로 매우 상세하고 풍성하게 작성)
 - 브랜드명: {brand_name}
+- 제품명: {product_name}
 - 제품 USP: {product_usp}
 - 행사/가격 정보: {event_info if event_info else '가이드 참조'}
 - 타겟층: {target_audience}
