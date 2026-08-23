@@ -254,7 +254,7 @@ st.markdown(f"""
         box-shadow: {'0 0 6px rgba(220, 39, 67, 0.6)' if is_insta else '0 0 6px rgba(3, 199, 90, 0.6)'} !important;
     }}
 
-    /* 7. 슬라이더 바 및 핸들 테마 동기화 (인스타/블로그 공통 완벽 적용) */
+    /* 7. 슬라이더 바 및 핸들 테마 동기화 (인스타/블로그 완벽 분기 적용) */
     div[data-testid="stSlider"] {{
         margin-bottom: 14px !important;
     }}
@@ -267,16 +267,21 @@ st.markdown(f"""
         height: 6px !important;
         border-radius: 4px !important;
     }}
+    /* 바 채움 색상 강제 지정 */
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div,
     div[data-testid="stSlider"] [data-baseweb="slider"] div[role="presentation"] div {{
         background: {slider_fill_color} !important;
     }}
+    /* 슬라이더 손잡이(Thumb) 색상 및 광채 효과 강제 지정 */
     div[data-testid="stSlider"] div[role="slider"] {{
         background: {slider_fill_color} !important;
         border: 2.5px solid #ffffff !important;
         width: 18px !important;
         height: 18px !important;
-        box-shadow: {'0 0 8px rgba(220, 39, 67, 0.8)' if is_insta else '0 0 8px rgba(3, 199, 90, 0.8)'} !important;
+        box-shadow: {
+            "0 0 8px rgba(220, 39, 67, 0.8)" 
+            if is_insta else "0 0 8px rgba(3, 199, 90, 0.8)"
+        } !important;
     }}
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
     div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
@@ -877,8 +882,8 @@ if generate_action:
 """
                 contents = []
                 if uploaded_images:
-                    for img_file in uploaded_images:
-                        contents.append(Image.open(img_file))
+                    for img in uploaded_images:
+                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
