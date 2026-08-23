@@ -267,12 +267,10 @@ st.markdown(f"""
         height: 6px !important;
         border-radius: 4px !important;
     }}
-    /* 바 채움 색상 강제 지정 */
     div[data-testid="stSlider"] [data-baseweb="slider"] > div:first-child > div,
     div[data-testid="stSlider"] [data-baseweb="slider"] div[role="presentation"] div {{
         background: {slider_fill_color} !important;
     }}
-    /* 슬라이더 손잡이(Thumb) 색상 및 광채 효과 강제 지정 */
     div[data-testid="stSlider"] div[role="slider"] {{
         background: {slider_fill_color} !important;
         border: 2.5px solid #ffffff !important;
@@ -557,14 +555,14 @@ with st.sidebar:
     st.markdown('<div class="sidebar-section-title"><span class="theme-badge">2</span> 추출 정보 확인 및 설정</div>', unsafe_allow_html=True)
     
     # 공통: 제품 카테고리
-    categories = ["기초/스킨케어", "색조/메이크업", "선케er/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
+    categories = ["기초/스킨케어", "색조/메이크업", "선케어/클렌징", "헤어/바디", "이너뷰티/다이어트", "뷰티소품/디바이스"]
     st.selectbox("제품 카테고리 (대본 톤앤매너 설정)", categories, key="product_category")
 
-    # 슬라이더 적용 (인스타 5~10장 / 블로그 14~20장, 기본값 15장)
+    # 슬라이더 적용 (인스타 5~10장, 기본 6장 / 블로그 14~20장, 기본 15장 명시적 value 전달)
     if is_insta:
-        st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, step=1, key="insta_scene_count")
+        st.slider("인스타 영상 장면 수 (5~10장)", min_value=5, max_value=10, value=st.session_state.insta_scene_count, step=1, key="insta_scene_count")
     else:
-        st.slider("블로그 사진 장수 (14~20장)", min_value=14, max_value=20, step=1, key="blog_photo_count")
+        st.slider("블로그 사진 장수 (14~20장)", min_value=14, max_value=20, value=st.session_state.blog_photo_count, step=1, key="blog_photo_count")
 
     brand_name = st.text_input("정확한 브랜드명 (임의 변경 절대 금지)", value=st.session_state.brand_name)
     product_name = st.text_input("정확한 제품명 (임의 변경 절대 금지)", value=st.session_state.product_name)
@@ -777,10 +775,6 @@ if generate_action:
 - 추가 전달사항: {guideline_text if guideline_text else '없음'}
 {url_context}
 """
-                contents = []
-                if uploaded_images:
-                    for img in uploaded_images:
-                        contents.append(Image.open(img))
                 contents.append(prompt_text)
 
                 try:
